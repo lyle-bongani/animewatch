@@ -1,0 +1,4 @@
+[
+  {"action": "click", "selector": "text=Vidnest"},
+  {"action": "wait", "value": 5000}
+]
