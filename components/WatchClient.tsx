@@ -7,6 +7,15 @@ import type { Anime, StreamingEpisode } from "@/lib/types";
 import { displayTitle, stripHtml, formatLabel } from "@/lib/types";
 import { AnimeRow } from "./AnimeRow";
 
+interface HistoryEntry {
+  id: number;
+  title: string;
+  coverImage: string;
+  episode: number;
+  totalEpisodes: number;
+  timestamp: number;
+}
+
 export function WatchClient({
   anime,
   totalEpisodes,
@@ -37,7 +46,7 @@ export function WatchClient({
   useEffect(() => {
     try {
       const stored = localStorage.getItem("animewatch_history");
-      const list = stored ? (JSON.parse(stored) as any[]) : [];
+      const list: HistoryEntry[] = stored ? (JSON.parse(stored) as HistoryEntry[]) : [];
       const filtered = list.filter((item) => item.id !== anime.id);
 
       const newItem = {

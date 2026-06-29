@@ -146,7 +146,6 @@ export async function searchAnime(
   perPage = 28,
   filters?: SearchFilters,
 ): Promise<SearchResult> {
-  const hasFilters = filters && Object.values(filters).some(v => v !== undefined);
   const searchVal = query.trim() || undefined;
 
   // Build the sort list. If search value is present and sort is not specified, use SEARCH_MATCH.
@@ -231,6 +230,12 @@ export async function getAnime(id: number): Promise<Anime | null> {
         studios(isMain: true) { nodes { name } }
         trailer { id site }
         streamingEpisodes { title thumbnail }
+        characters(perPage: 8, sort: [ROLE, FAVOURITES_DESC]) {
+          nodes { name { full } }
+        }
+        staff(perPage: 8, sort: RELEVANCE) {
+          edges { role node { name { full } } }
+        }
         recommendations(perPage: 12, sort: RATING_DESC) {
           nodes {
             mediaRecommendation {

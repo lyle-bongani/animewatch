@@ -36,6 +36,8 @@ export interface Anime {
   nextAiringEpisode?: { episode: number; airingAt: number } | null;
   trailer?: { id: string | null; site: string | null } | null;
   streamingEpisodes?: StreamingEpisode[];
+  characters?: { nodes: { name: { full: string | null } }[] };
+  staff?: { edges: { role: string | null; node: { name: { full: string | null } } }[] };
   recommendations?: {
     nodes: { mediaRecommendation: Anime | null }[];
   };
@@ -81,4 +83,37 @@ export function formatLabel(format?: string | null): string {
     MUSIC: "Music",
   };
   return map[format] ?? format;
+}
+
+/**
+ * Personalized-style "% Match" badge (green on Netflix). We don't have a taste
+ * profile, so we surface AniList's average score (already 0–100) as the match.
+ */
+export function matchPercent(a: Pick<Anime, "averageScore">): number | null {
+  if (!a.averageScore) return null;
+  return Math.min(99, Math.max(50, a.averageScore));
+}
+
+/** Maturity rating chip, mirroring Netflix's bordered maturity tag. */
+export function maturityLabel(a: Pick<Anime, "isAdult" | "genres">): string {
+  if (a.isAdult) return "18+";
+  const mature = ["Ecchi", "Horror", "Thriller", "Psychological"];
+  if (a.genres?.some((g) => mature.includes(g))) return "16+";
+  return "13+";
+}
+
+/** Director name from the AniList staff edges, if present. */
+export function directorName(a: Pick<Anime, "staff">): string | null {
+  const edge = a.staff?.edges.find((e) => (e.role ?? "").toLowerCase().includes("director"));
+  return edge?.node.name.full ?? null;
+}
+
+/** Main cast / character names. */
+export function castNames(a: Pick<Anime, "characters">, limit = 4): string[] {
+  return (
+    a.characters?.nodes
+      .map((n) => n.name.full)
+      .filter((n): n is string => !!n)
+      .slice(0, limit) ?? []
+  );
 }

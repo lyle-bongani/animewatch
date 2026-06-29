@@ -1,5 +1,6 @@
 import { HeroSpotlight } from "@/components/HeroSpotlight";
 import { AnimeGrid } from "@/components/AnimeGrid";
+import { AnimeRow } from "@/components/AnimeRow";
 import { ContinueWatching } from "@/components/ContinueWatching";
 import { RecentEpisodes } from "@/components/RecentEpisodes";
 import { TopRankings } from "@/components/TopRankings";
@@ -23,6 +24,10 @@ export default async function Home() {
       <HeroSpotlight items={spotlight} />
 
       <ContinueWatching />
+
+      {/* Trending Poster Cards with large ranking numbers */}
+      <AnimeRow title="Trending Now" items={trending.slice(0, 10)} numbered />
+
 
       <div className="mx-auto max-w-7xl px-4">
         <div className="grid gap-8 lg:grid-cols-[1fr_320px]">

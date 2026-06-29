@@ -14,7 +14,7 @@ export function RecentEpisodes({ items }: { items: AiringScheduleItem[] }) {
         </h2>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      <div className="netflix-grid grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {items.map((item, idx) => {
           const anime = item.media;
           const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : null;
@@ -23,7 +23,7 @@ export function RecentEpisodes({ items }: { items: AiringScheduleItem[] }) {
             <Link
               key={`${anime.id}-${item.episode}-${idx}`}
               href={`/watch/${anime.id}?ep=${item.episode}`}
-              className="group block focus:outline-none"
+              className="netflix-card group block focus:outline-none"
               title={`${displayTitle(anime)} — Episode ${item.episode}`}
             >
               <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface-2 ring-1 ring-border transition-all group-hover:ring-accent">

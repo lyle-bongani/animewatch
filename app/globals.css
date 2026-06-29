@@ -1,25 +1,57 @@
 @import "tailwindcss";
 
+/*
+ * Hawkins-inspired color space (18-token surface hierarchy).
+ * canvas → surface deep → surface card → surface input, lightening grays
+ * that layer depth while keeping colorful artwork the focus.
+ */
 :root {
-  --background: #141414;
-  --surface: #181818;
-  --surface-2: #242424;
-  --border: #333333;
-  --foreground: #ffffff;
-  --muted: #aaaaaa;
-  --accent: #e50914;
-  --accent-hover: #b80710;
+  --canvas: #000000;        /* universal page background */
+  --surface-deep: #161616;  /* content row backing panels */
+  --surface-card: #232323;  /* feature blocks, static cards */
+  --surface-input: #2d2d2d; /* text fields, search, forms */
+
+  --brand-red: #e50914;     /* logos, primary CTAs, progress */
+  --brand-burgundy: #461518;/* trending-row gradients */
+  --brand-oxblood: #6f181d; /* hero linear gradients */
+  --brand-navy: #192247;    /* trending/rating row backgrounds */
+  --brand-electric: #4061e7;/* alert banners */
+
+  --ink-base: #ffffff;      /* primary text */
+  --ink-muted: #808080;     /* secondary metadata */
+  --hairline: #414141;      /* borders, dividers */
+
+  /* Shared 8px corner radius (44 of 71 measurements) */
+  --radius: 8px;
+
+  /* Aliases consumed by the Tailwind theme + existing components */
+  --background: var(--canvas);
+  --surface: var(--surface-deep);
+  --surface-2: var(--surface-card);
+  --surface-input-c: var(--surface-input);
+  --border: var(--hairline);
+  --foreground: var(--ink-base);
+  --muted: var(--ink-muted);
+  --accent: var(--brand-red);
+  --accent-hover: #f6121d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-surface-input: var(--surface-input-c);
   --color-border: var(--border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-burgundy: var(--brand-burgundy);
+  --color-oxblood: var(--brand-oxblood);
+  --color-navy: var(--brand-navy);
+  --color-electric: var(--brand-electric);
+  --color-match: #46d369; /* Netflix green "% Match" */
+  --radius-card: var(--radius);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -34,7 +66,32 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Thin custom scrollbars to match the warm theme */
+/*
+ * Typographic hierarchy: a heavy display weight (900) sits directly over a
+ * clean body weight (400), skipping mid-levels for high contrast.
+ */
+.type-display {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.type-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.type-row {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.type-body {
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  line-height: 1.4;
+}
+
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -50,7 +107,6 @@ body {
   background: var(--muted);
 }
 
-/* Horizontal carousel rows */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -60,6 +116,12 @@ body {
 }
 
 /* Clamp helpers */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -71,4 +133,72 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── Keyframes (referenced by animate-* utility classes below) ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modalPop {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in,
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease both;
+}
+.animate-modal-pop {
+  animation: modalPop 0.32s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+/*
+ * ── Netflix card hover physics (horizontal rows) ──
+ * On hover the active card scales up and is centered (transform-origin: center).
+ * For scale S the card grows (S-1) total, split (S-1)/2 to each side, so siblings
+ * shift away by exactly half the expansion to avoid overlap. We use S = 1.4, so
+ * the shift is 20% of original width. RTL flips the translate vectors.
+ */
+.nflx-row {
+  --card-scale: 1.4;
+  --card-shift: 20%;
+}
+.nflx-row .nflx-item {
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+}
+/* Following siblings of the hovered card move right */
+.nflx-row .nflx-item:hover ~ .nflx-item {
+  transform: translateX(var(--card-shift));
+}
+/* When the row is hovered, every card slides left… */
+.nflx-row:hover .nflx-item {
+  transform: translateX(calc(-1 * var(--card-shift)));
+}
+/* …except the hovered card, which scales from center without translating… */
+.nflx-row:hover .nflx-item:hover {
+  transform: scale(var(--card-scale));
+  z-index: 30;
+}
+/* …and its following siblings, which shift back to the right. */
+.nflx-row:hover .nflx-item:hover ~ .nflx-item {
+  transform: translateX(var(--card-shift));
+}
+[dir="rtl"] .nflx-row .nflx-item:hover ~ .nflx-item,
+[dir="rtl"] .nflx-row:hover .nflx-item:hover ~ .nflx-item {
+  transform: translateX(calc(-1 * var(--card-shift)));
+}
+[dir="rtl"] .nflx-row:hover .nflx-item {
+  transform: translateX(var(--card-shift));
+}
+
+/* Gentle scale for 2D wrap grids (sibling shifts would break across rows) */
+.netflix-grid .netflix-card {
+  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: center center;
+}
+.netflix-grid .netflix-card:hover {
+  transform: scale(1.08);
+  z-index: 20;
+  position: relative;
 }
