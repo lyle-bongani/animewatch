@@ -160,8 +160,8 @@ body {
  * the shift is 20% of original width. RTL flips the translate vectors.
  */
 .nflx-row {
-  --card-scale: 1.4;
-  --card-shift: 20%;
+  --card-scale: 1.3;
+  --card-shift: 15%; /* half of (scale - 1) keeps siblings from overlapping */
 }
 .nflx-row .nflx-item {
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);

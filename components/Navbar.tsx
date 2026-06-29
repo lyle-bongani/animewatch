@@ -13,12 +13,21 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+
+  // Netflix-style header: transparent over the hero, solid once scrolled
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Live search dropdown (debounced)
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale results when the query is too short
       setResults([]);
       return;
     }
@@ -64,7 +73,13 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur">
+    <header
+      className={`sticky top-0 z-50 transition-colors duration-300 ${
+        scrolled
+          ? "border-b border-border bg-background/95 backdrop-blur"
+          : "border-b border-transparent bg-gradient-to-b from-black/80 via-black/40 to-transparent"
+      }`}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-6">
         <Link href="/" className="flex shrink-0 items-center gap-2">
           <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent font-bold text-white">

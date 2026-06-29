@@ -20,6 +20,7 @@ export function WatchlistButton({ anime }: { anime: Anime }) {
       const stored = localStorage.getItem("animewatch_watchlist");
       if (stored) {
         const list = JSON.parse(stored) as WatchlistItem[];
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate from localStorage on mount
         setInWatchlist(list.some((item) => item.id === anime.id));
       }
     } catch (e) {
