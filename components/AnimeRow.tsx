@@ -45,20 +45,6 @@ export function AnimeRow({
       </div>
 
       <div className="relative">
-        {/* Left scroll arrow (desktop, on row hover) */}
-        <button
-          onClick={() => scrollByPage(-1)}
-          aria-label="Scroll left"
-          className="absolute inset-y-10 left-0 z-40 hidden w-12 items-center justify-center rounded-r-[var(--radius-card)] bg-background/60 text-white opacity-0 transition-opacity hover:bg-background/80 group-hover/row:opacity-100 sm:flex"
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-
-        {/* nflx-row drives the sibling hover physics defined in globals.css.
-            Generous vertical padding gives the hover-scaled card room so it
-            isn't clipped by the horizontal scroll container. */}
         <div
           ref={scroller}
           className="nflx-row no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-10 sm:gap-4"
@@ -85,17 +71,6 @@ export function AnimeRow({
             </div>
           ))}
         </div>
-
-        {/* Right scroll arrow */}
-        <button
-          onClick={() => scrollByPage(1)}
-          aria-label="Scroll right"
-          className="absolute inset-y-10 right-0 z-40 hidden w-12 items-center justify-center rounded-l-[var(--radius-card)] bg-background/60 text-white opacity-0 transition-opacity hover:bg-background/80 group-hover/row:opacity-100 sm:flex"
-        >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m9 18 6-6-6-6" />
-          </svg>
-        </button>
       </div>
     </section>
   );

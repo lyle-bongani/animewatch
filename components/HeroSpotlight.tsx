@@ -32,7 +32,7 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
   const match = matchPercent(a);
 
   return (
-    <section className="relative h-[80vh] min-h-[480px] w-full overflow-hidden">
+    <section className="relative h-[100vh] min-h-[600px] w-full overflow-hidden">
       {/* Billboard background */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -43,10 +43,10 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
       />
       {/* Netflix-style gradients: dark from the left for text, fade to page at the bottom */}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/5 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
       {/* Content */}
-      <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-8">
+      <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-20 sm:px-8 sm:pb-28">
         <div className="max-w-xl">
           <div className="mb-3 flex items-center gap-2">
             <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
@@ -123,24 +123,7 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
           ))}
         </div>
       )}
-      {count > 1 && (
-        <>
-          <button
-            onClick={() => go(-1)}
-            aria-label="Previous"
-            className="absolute left-3 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/30 bg-black/40 p-2 text-white backdrop-blur transition-colors hover:bg-black/70 sm:block"
-          >
-            <Chevron dir="left" />
-          </button>
-          <button
-            onClick={() => go(1)}
-            aria-label="Next"
-            className="absolute right-3 top-1/2 hidden -translate-y-1/2 rounded-full border border-white/30 bg-black/40 p-2 text-white backdrop-blur transition-colors hover:bg-black/70 sm:block"
-          >
-            <Chevron dir="right" />
-          </button>
-        </>
-      )}
+
     </section>
   );
 }

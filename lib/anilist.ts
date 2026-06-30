@@ -41,6 +41,7 @@ async function gql<T>(
       },
       body: JSON.stringify({ query, variables }),
       next: { revalidate },
+      signal: AbortSignal.timeout(4000),
     });
 
     if (!res.ok) {
