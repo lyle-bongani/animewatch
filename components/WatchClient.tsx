@@ -35,7 +35,11 @@ export function WatchClient({
   const [lightOff, setLightOff] = useState(false);
 
   const server = getServer(serverId);
-  const src = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type });
+  const slug = (anime.title.romaji || anime.title.english || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  const src = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type, slug });
 
   // Keep the URL shareable without a full navigation.
   useEffect(() => {

@@ -18,7 +18,7 @@ export interface EmbedServer {
   /** Whether this provider offers a dub track. */
   supportsDub: boolean;
   /** Build the iframe src for a given anime/episode. */
-  build: (params: { anilistId: number; malId?: number | null; episode: number; type: AudioType }) => string;
+  build: (params: { anilistId: number; malId?: number | null; episode: number; type: AudioType; slug: string }) => string;
 }
 
 export const SERVERS: EmbedServer[] = [
@@ -58,6 +58,20 @@ export const SERVERS: EmbedServer[] = [
       const id = malId || anilistId;
       return `https://vidlink.pro/anime/${id}/${episode}/${type}?fallback=true&primaryColor=e88b52`;
     },
+  },
+  {
+    id: "vidlink-donghua",
+    name: "Donghua-1",
+    supportsDub: false,
+    build: ({ slug, episode, type }) =>
+      `https://vidlink.pro/anime/${slug}/${episode}/${type}?fallback=true&primaryColor=e88b52`,
+  },
+  {
+    id: "vidsrcto-donghua",
+    name: "Donghua-2",
+    supportsDub: false,
+    build: ({ slug, episode }) =>
+      `https://vidsrc.to/embed/anime/${slug}/${episode}`,
   },
 ];
 
