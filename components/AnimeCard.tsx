@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Anime } from "@/lib/types";
-import { displayTitle, formatLabel, matchPercent, maturityLabel } from "@/lib/types";
+import { displayTitle, formatLabel, is3D, matchPercent, maturityLabel } from "@/lib/types";
 
 export function AnimeCard({ anime }: { anime: Anime }) {
   const match = matchPercent(anime);
@@ -24,6 +24,13 @@ export function AnimeCard({ anime }: { anime: Anime }) {
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+
+        {/* 2D/3D Donghua Badge */}
+        {anime.countryOfOrigin === "CN" && (
+          <span className="absolute left-2.5 top-2.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-white border border-white/20 backdrop-blur-sm shadow-md">
+            {is3D(anime) ? "3D Donghua" : "2D Donghua"}
+          </span>
+        )}
 
         {/* Episode badge (always visible while browsing) */}
         {!!ep && (

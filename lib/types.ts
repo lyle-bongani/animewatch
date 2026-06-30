@@ -41,11 +41,22 @@ export interface Anime {
   recommendations?: {
     nodes: { mediaRecommendation: Anime | null }[];
   };
+  countryOfOrigin?: string | null;
+  tags?: { name: string }[];
 }
 
 /** Preferred display title: English, then Romaji, then Native. */
 export function displayTitle(a: Pick<Anime, "title">): string {
   return a.title.english || a.title.romaji || a.title.native || "Untitled";
+}
+
+/** Detect if a Chinese anime/donghua is 3D CGI or traditionally 2D. */
+export function is3D(a: Anime): boolean {
+  if (!a.tags) return false;
+  return a.tags.some((t) => {
+    const name = t.name.toLowerCase();
+    return name.includes("cgi") || name === "3d" || name.includes("3d cgi") || name === "computer-animated" || name.includes("3d cg");
+  });
 }
 
 /** Strip AniList HTML description down to plain text. */

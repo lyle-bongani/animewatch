@@ -58,12 +58,14 @@
 
 html {
   scroll-padding-top: 5rem;
+  overflow-y: scroll; /* Prevents page-level layout shifting/shaking from scrollbar toggling */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overflow-x: hidden; /* Prevents horizontal scrollbar spawning during card zoom scales */
 }
 
 /*
@@ -162,6 +164,7 @@ body {
 .nflx-row {
   --card-scale: 1.3;
   --card-shift: 15%; /* half of (scale - 1) keeps siblings from overlapping */
+  overflow-y: hidden; /* Prevents row-level vertical scrollbar jitter */
 }
 .nflx-row .nflx-item {
   transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);

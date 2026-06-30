@@ -30,11 +30,25 @@ export const SERVERS: EmbedServer[] = [
       `https://vidnest.fun/anime/${anilistId}/${episode}/${type}`,
   },
   {
+    id: "embedsu",
+    name: "HD-2",
+    supportsDub: false,
+    build: ({ anilistId, episode }) =>
+      `https://embed.su/embed/anime/ani${anilistId}/${episode}`,
+  },
+  {
     id: "vidsrc",
     name: "VidCloud-1",
     supportsDub: true,
     build: ({ anilistId, episode, type }) =>
       `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${episode}/${type}?autoPlay=false`,
+  },
+  {
+    id: "vidsrcto",
+    name: "VidCloud-2",
+    supportsDub: false,
+    build: ({ anilistId, episode }) =>
+      `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`,
   },
   {
     id: "vidlink",

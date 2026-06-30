@@ -1,4 +1,4 @@
-import type { Anime } from "./types";
+import { is3D, type Anime } from "./types";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -20,6 +20,8 @@ const CARD_FIELDS = `
   seasonYear
   isAdult
   nextAiringEpisode { episode airingAt }
+  countryOfOrigin
+  tags { name }
 `;
 
 interface GraphQLResponse<T> {
@@ -114,10 +116,27 @@ export function getByGenre(genre: string, perPage = 24): Promise<Anime[]> {
 }
 
 export function getIsekai(perPage = 24): Promise<Anime[]> {
+  return getIsekaiBySort(["POPULARITY_DESC"], perPage);
+}
+
+export function getIsekaiBySort(sort: string[], perPage = 24): Promise<Anime[]> {
+  return gql<PageResult>(
+    `query ($perPage: Int, $sort: [MediaSort]) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, tag: "Isekai", sort: $sort, isAdult: false) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { perPage, sort },
+  ).then((d) => d?.Page.media ?? []);
+}
+
+export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
   return gql<PageResult>(
     `query ($perPage: Int) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, tag: "Isekai", sort: POPULARITY_DESC, isAdult: false) {
+        media(type: ANIME, tag: "Isekai", status: RELEASING, sort: POPULARITY_DESC, isAdult: false) {
           ${CARD_FIELDS}
         }
       }
@@ -139,6 +158,7 @@ export interface SearchFilters {
   season?: string;
   seasonYear?: number;
   sort?: string[];
+  countryOfOrigin?: string;
 }
 
 export async function searchAnime(
@@ -160,10 +180,10 @@ export async function searchAnime(
   const data = await gql<{
     Page: { pageInfo: { hasNextPage: boolean; currentPage: number }; media: Anime[] };
   }>(
-    `query ($search: String, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int, $sort: [MediaSort]) {
+    `query ($search: String, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int, $sort: [MediaSort], $country: CountryCode) {
       Page(page: $page, perPage: $perPage) {
         pageInfo { hasNextPage currentPage }
-        media(type: ANIME, search: $search, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, sort: $sort, isAdult: false) {
+        media(type: ANIME, search: $search, countryOfOrigin: $country, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, sort: $sort, isAdult: false) {
           ${CARD_FIELDS}
         }
       }
@@ -178,6 +198,7 @@ export async function searchAnime(
       season: filters?.season || undefined,
       seasonYear: filters?.seasonYear || undefined,
       sort: sortList,
+      country: filters?.countryOfOrigin || undefined,
     },
     300,
   );
@@ -249,5 +270,30 @@ export async function getAnime(id: number): Promise<Anime | null> {
     { id },
   );
   return data?.Media ?? null;
+}
+
+export async function getDonghuaBySort(
+  sort: string[],
+  perPage = 24,
+  filters?: { is3D?: boolean; status?: string }
+): Promise<Anime[]> {
+  const data = await gql<PageResult>(
+    `query ($perPage: Int, $sort: [MediaSort], $status: MediaStatus) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, countryOfOrigin: "CN", sort: $sort, status: $status, isAdult: false) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { perPage, sort, status: filters?.status || undefined },
+  );
+  let results = data?.Page.media ?? [];
+  if (filters?.is3D !== undefined) {
+    results = results.filter((a) => {
+      const is3d = is3D(a);
+      return filters.is3D ? is3d : !is3d;
+    });
+  }
+  return results;
 }
 

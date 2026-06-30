@@ -14,10 +14,11 @@ import {
   watchableEpisodes,
 } from "@/lib/types";
 import { WatchlistButton } from "./WatchlistButton";
+import { TrailerModal } from "./TrailerModal";
 
 export function DetailsModal({ anime }: { anime: Anime }) {
   const router = useRouter();
-  const [muted, setMuted] = useState(true);
+  const [showTrailer, setShowTrailer] = useState(false);
 
   const close = () => router.back();
 
@@ -57,22 +58,10 @@ export function DetailsModal({ anime }: { anime: Anime }) {
         className="animate-modal-pop relative my-0 h-fit w-full max-w-3xl overflow-hidden rounded-none bg-surface shadow-2xl sm:my-4 sm:rounded-[var(--radius-card)]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Hero banner (auto-play trailer with mute control) ── */}
+        {/* ── Hero banner (static cover image) ── */}
         <div className="relative aspect-video w-full overflow-hidden bg-black">
-          {isYouTube ? (
-            <iframe
-              key={muted ? "muted" : "unmuted"}
-              src={`https://www.youtube.com/embed/${anime.trailer!.id}?autoplay=1&mute=${
-                muted ? 1 : 0
-              }&controls=0&loop=1&playlist=${anime.trailer!.id}&modestbranding=1&rel=0`}
-              title={`${displayTitle(anime)} trailer`}
-              allow="autoplay; encrypted-media"
-              className="absolute inset-0 h-full w-full"
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={heroImg} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
 
           {/* Close */}
@@ -85,17 +74,6 @@ export function DetailsModal({ anime }: { anime: Anime }) {
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
-
-          {/* Mute toggle */}
-          {isYouTube && (
-            <button
-              onClick={() => setMuted((m) => !m)}
-              aria-label={muted ? "Unmute" : "Mute"}
-              className="absolute bottom-24 right-4 grid h-9 w-9 place-items-center rounded-full border border-white/40 bg-black/40 text-white transition-colors hover:border-white"
-            >
-              {muted ? <MutedIcon /> : <SoundIcon />}
-            </button>
-          )}
 
           {/* Title + primary CTAs over the hero */}
           <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
@@ -115,6 +93,18 @@ export function DetailsModal({ anime }: { anime: Anime }) {
               <div className="w-44">
                 <WatchlistButton anime={anime} />
               </div>
+              {isYouTube && (
+                <button
+                  onClick={() => setShowTrailer(true)}
+                  className="inline-flex items-center gap-2 rounded-[var(--radius-card)] border border-white/40 bg-zinc-500/35 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-zinc-500/25"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                  </svg>
+                  Trailer
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -225,6 +215,9 @@ export function DetailsModal({ anime }: { anime: Anime }) {
               ))}
             </div>
           </div>
+        )}
+        {showTrailer && isYouTube && (
+          <TrailerModal youtubeId={anime.trailer!.id as string} onClose={() => setShowTrailer(false)} />
         )}
       </div>
     </div>

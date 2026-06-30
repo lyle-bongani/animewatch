@@ -166,6 +166,12 @@ export function Navbar() {
           <Link href="/search?q=trending" className="hover:text-foreground">
             Browse
           </Link>
+          <Link href="/isekai" className="hover:text-foreground">
+            Isekai
+          </Link>
+          <Link href="/donghua" className="hover:text-foreground">
+            Donghua
+          </Link>
           <Link href="/watchlist" className="hover:text-foreground">
             Watchlist
           </Link>
@@ -192,6 +198,24 @@ export function Navbar() {
             <path d="m21 21-4.3-4.3" />
           </svg>
           <span className="text-[10px] font-medium">Browse</span>
+        </Link>
+        <Link
+          href="/isekai"
+          className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          <span className="text-[10px] font-medium">Isekai</span>
+        </Link>
+        <Link
+          href="/donghua"
+          className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          <span className="text-[10px] font-medium">Donghua</span>
         </Link>
         <Link
           href="/watchlist"
@@ -239,6 +263,20 @@ export function Navbar() {
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
                 Browse
+              </Link>
+              <Link
+                href="/isekai"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                Isekai
+              </Link>
+              <Link
+                href="/donghua"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                Donghua
               </Link>
               <Link
                 href="/watchlist"
