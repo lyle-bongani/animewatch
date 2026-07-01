@@ -1,6 +1,6 @@
 import { HeroSpotlight } from "@/components/HeroSpotlight";
 import { DonghuaTabs } from "@/components/DonghuaTabs";
-import { getDonghuaBySort } from "@/lib/anilist";
+import { getDonghuaBySort, getAnimeByIds, DONGHUA_LIST_IDS } from "@/lib/anilist";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,11 +10,12 @@ export const metadata: Metadata = {
 
 export default async function DonghuaPage() {
   // Fetch initial content for SEO and fast initial paint
-  const [trending, popular2D, popular3D, ongoing] = await Promise.all([
+  const [trending, popular2D, popular3D, ongoing, donghuaListTop] = await Promise.all([
     getDonghuaBySort(["TRENDING_DESC"], 5),
     getDonghuaBySort(["POPULARITY_DESC"], 20, { is3D: false }),
     getDonghuaBySort(["POPULARITY_DESC"], 20, { is3D: true }),
     getDonghuaBySort(["POPULARITY_DESC"], 20, { status: "RELEASING" }),
+    getAnimeByIds(DONGHUA_LIST_IDS),
   ]);
 
   return (
@@ -30,6 +31,7 @@ export default async function DonghuaPage() {
         </h2>
         
         <DonghuaTabs
+          donghuaListTop={donghuaListTop}
           popular2D={popular2D}
           popular3D={popular3D}
           ongoing={ongoing}

@@ -297,3 +297,38 @@ export async function getDonghuaBySort(
   return results;
 }
 
+export const DONGHUA_LIST_IDS = [
+  166442, // Renegade Immortal – Xian Ni
+  123616, // A Record of Mortal’s Journey to Immortality
+  124976, // Swallowed Star – Tunshi Xingkong
+  101416, // Soul Land – Douluo Dalu
+  101413, // Battle Through the Heavens – Doupo Cangqiong
+  124977, // Martial Master – Wu Shen Zhu Zai
+  122325, // A Will Eternal – Yi Nian Yong Heng
+  105615, // Stellar Transformation – Xing Chen Bian
+  103444, // Wan Jie Xian Zong – Fairy Legends
+  142738, // Immortality – Yong Sheng
+  131102, // Ten Thousand Worlds – Wan Jie Du Zun
+  157973, // Apotheosis – Bai Lian Cheng Shen
+  181700, // World of Immortals – Chang Sheng Jie
+  143891, // Purple River – Zi Chuan
+  149673, // Throne of Seal – Shen Yin Wangzuo
+  169460, // Against the Gods – Nitian Xie Shen
+  101407, // Tales of Demons and Gods – Yao Shen Ji
+];
+
+export async function getAnimeByIds(ids: number[]): Promise<Anime[]> {
+  const data = await gql<{ Page: { media: Anime[] } }>(
+    `query ($ids: [Int]) {
+      Page(page: 1, perPage: 50) {
+        media(id_in: $ids, type: ANIME) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { ids },
+  );
+  const media = data?.Page.media ?? [];
+  return media.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+}
+
