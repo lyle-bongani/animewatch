@@ -258,6 +258,19 @@ export async function getAnime(id: number): Promise<Anime | null> {
         staff(perPage: 8, sort: RELEVANCE) {
           edges { role node { name { full } } }
         }
+        relations {
+          edges {
+            relationType
+            node {
+              id
+              type
+              format
+              status
+              title { romaji english native }
+              coverImage { large extraLarge color }
+            }
+          }
+        }
         recommendations(perPage: 12, sort: RATING_DESC) {
           nodes {
             mediaRecommendation {

@@ -43,6 +43,19 @@ export interface Anime {
   };
   countryOfOrigin?: string | null;
   tags?: { name: string }[];
+  relations?: {
+    edges: {
+      relationType: string;
+      node: {
+        id: number;
+        type: string;
+        format: string;
+        status: string;
+        title: AnimeTitle;
+        coverImage?: CoverImage;
+      };
+    }[];
+  };
 }
 
 /** Preferred display title: English, then Romaji, then Native. */

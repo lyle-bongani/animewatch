@@ -91,6 +91,21 @@ export function WatchClient({
 
   const studios = anime.studios?.nodes.map((s) => s.name).filter(Boolean) ?? [];
 
+  const relations = useMemo(() => {
+    return (
+      anime.relations?.edges
+        ?.filter((edge) => edge.node.type === "ANIME" && ["SEQUEL", "PREQUEL", "SIDE_STORY", "ALTERNATIVE", "PARENT", "SPIN_OFF"].includes(edge.relationType))
+        ?.map((edge) => ({
+          id: edge.node.id,
+          relationType: edge.relationType,
+          title: displayTitle(edge.node),
+          status: edge.node.status,
+          format: edge.node.format,
+          cover: edge.node.coverImage?.large ?? edge.node.coverImage?.extraLarge ?? "",
+        })) ?? []
+    );
+  }, [anime.relations]);
+
   function changeEpisode(n: number) {
     setEpisode(n);
     setIframeKey((k) => k + 1);
@@ -272,6 +287,45 @@ export function WatchClient({
             </div>
           </div>
         </div>
+
+        {/* Related Seasons & Series */}
+        {relations.length > 0 && (
+          <aside className="rounded-xl border border-border bg-surface p-4">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
+              Other Seasons / Related
+            </h2>
+            <div className="flex flex-col gap-2.5">
+              {relations.map((rel) => (
+                <Link
+                  key={rel.id}
+                  href={`/watch/${rel.id}?ep=1`}
+                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-surface-2 p-2.5 transition-colors hover:border-accent/40 hover:bg-surface-3 cursor-pointer"
+                >
+                  {rel.cover && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={rel.cover}
+                      alt=""
+                      loading="lazy"
+                      className="h-12 w-9 rounded object-cover shadow-sm shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent leading-none">
+                      {rel.relationType.replace(/_/g, " ")}
+                    </span>
+                    <h3 className="mt-1 truncate text-xs font-semibold text-foreground/90">
+                      {rel.title}
+                    </h3>
+                    <p className="text-[10px] text-muted capitalize mt-0.5">
+                      {rel.format} · {rel.status?.toLowerCase()}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </aside>
+        )}
 
         {/* Episode list */}
         <aside className="rounded-xl border border-border bg-surface">
