@@ -128,7 +128,10 @@ export function WatchClient({
         {/* Player column */}
         <div className={lightOff ? "relative z-50" : ""}>
           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
-            {server.id === "donghuastream" || server.id === "animexin" ? (
+            {server.id === "donghuastream" ||
+            server.id === "animexin" ||
+            server.id === "vidlink-donghua" ||
+            server.id === "vidsrcto-donghua" ? (
               <div className="flex h-full w-full flex-col items-center justify-center bg-surface-2 p-6 text-center">
                 <span className="mb-3 text-4xl sm:text-5xl">🚀</span>
                 <h3 className="mb-2 text-base sm:text-lg font-bold">Watch on {server.name}</h3>
