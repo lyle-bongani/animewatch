@@ -77,15 +77,15 @@ export const SERVERS: EmbedServer[] = [
     id: "donghuastream",
     name: "DonghuaStream",
     supportsDub: false,
-    build: ({ slug }) =>
-      `https://donghuastream.org/?s=${encodeURIComponent(slug.replace(/-/g, " "))}`,
+    build: ({ slug, episode }) =>
+      `https://donghuastream.org/${slug}-episode-${episode}-multiple-subtitles/`,
   },
   {
     id: "animexin",
     name: "AnimeXin",
     supportsDub: false,
-    build: ({ slug }) =>
-      `https://animexin.dev/?s=${encodeURIComponent(slug.replace(/-/g, " "))}`,
+    build: ({ slug, episode }) =>
+      `https://animexin.dev/${slug}-episode-${episode}-subbed/`,
   },
 ];
 
