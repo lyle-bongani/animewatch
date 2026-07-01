@@ -31,11 +31,11 @@ export default async function Home() {
       {/* Netflix-style stack of horizontal carousels */}
       <div className="relative z-10 flex flex-col gap-8 pt-8 sm:gap-12">
         <ContinueWatching />
-        <AnimeRow title="Trending Now" items={trending.slice(0, 10)} numbered />
+        <AnimeRow title="Trending Now" items={trending.slice(0, 10)} href="/search?q=trending" numbered />
         <AnimeRow title="New & Popular This Season" items={airing} href="/search?q=airing" />
         <AnimeRow title="Popular on AnimeWatch" items={popular} href="/search?q=popular" />
         <AnimeRow title="Top Rated" items={topRated} href="/search?q=top" />
-        <AnimeRow title="Isekai & Fantasy Worlds" items={isekai} />
+        <AnimeRow title="Isekai & Fantasy Worlds" items={isekai} href="/isekai" />
 
         {/* Recently released episodes (grid keeps the per-episode badges) */}
         <section className="mx-auto w-full max-w-7xl px-4">

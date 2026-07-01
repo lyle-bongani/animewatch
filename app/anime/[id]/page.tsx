@@ -133,7 +133,11 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
 
       {recs.length > 0 && (
         <div className="mt-14">
-          <AnimeRow title="You might also like" items={recs} />
+          <AnimeRow
+            title="You might also like"
+            items={recs}
+            href={anime.genres?.[0] ? `/search?genre=${encodeURIComponent(anime.genres[0])}` : "/search"}
+          />
         </div>
       )}
     </div>

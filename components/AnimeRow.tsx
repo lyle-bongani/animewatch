@@ -34,10 +34,10 @@ export function AnimeRow({
         {href && (
           <Link
             href={href}
-            className="flex items-center gap-1 text-xs font-medium text-muted opacity-0 transition-all hover:text-foreground group-hover/row:opacity-100"
+            className="flex items-center gap-0.5 text-xs sm:text-sm font-semibold text-accent transition-all hover:text-accent-hover hover:underline cursor-pointer"
           >
-            Explore all
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            View All
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mt-0.5">
               <path d="m9 18 6-6-6-6" />
             </svg>
           </Link>

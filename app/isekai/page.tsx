@@ -25,10 +25,10 @@ export default async function IsekaiPage() {
 
       {/* Netflix-style stack of horizontal carousels */}
       <div className="relative z-10 flex flex-col gap-8 pt-8 sm:gap-12">
-        <AnimeRow title="Ongoing Isekai Series" items={ongoing} />
-        <AnimeRow title="Latest Isekai Releases" items={latest} />
-        <AnimeRow title="Trending Isekai" items={trending} numbered />
-        <AnimeRow title="Most Popular Isekai" items={popular} />
+        <AnimeRow title="Ongoing Isekai Series" items={ongoing} href="/search?genre=Isekai&status=RELEASING" />
+        <AnimeRow title="Latest Isekai Releases" items={latest} href="/search?genre=Isekai&sort=START_DATE_DESC" />
+        <AnimeRow title="Trending Isekai" items={trending} href="/search?genre=Isekai&sort=TRENDING_DESC" numbered />
+        <AnimeRow title="Most Popular Isekai" items={popular} href="/search?genre=Isekai&sort=POPULARITY_DESC" />
       </div>
     </div>
   );

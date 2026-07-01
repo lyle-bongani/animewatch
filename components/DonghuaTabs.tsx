@@ -87,9 +87,9 @@ export function DonghuaTabs({ donghuaListTop, popular2D, popular3D, ongoing }: D
       <div className="relative z-10 flex flex-col gap-6">
         {activeTab === "top200" && (
           <div>
-            <AnimeRow title="Top Ranked Donghua (DonghuaList)" items={donghuaListTop.slice(0, 8)} />
+            <AnimeRow title="Top Ranked Donghua (DonghuaList)" items={donghuaListTop.slice(0, 8)} href="#more-top200" />
             <div className="mt-8">
-              <h3 className="mb-4 text-base font-bold uppercase tracking-wider text-muted">
+              <h3 id="more-top200" className="mb-4 text-base font-bold uppercase tracking-wider text-muted scroll-mt-20">
                 All Ranked Masterpieces
               </h3>
               <AnimeGrid items={donghuaListTop.slice(8)} />
@@ -99,9 +99,9 @@ export function DonghuaTabs({ donghuaListTop, popular2D, popular3D, ongoing }: D
 
         {activeTab === "2d" && (
           <div>
-            <AnimeRow title="Top 2D Donghua Picks" items={popular2D.slice(0, 8)} />
+            <AnimeRow title="Top 2D Donghua Picks" items={popular2D.slice(0, 8)} href="#more-2d" />
             <div className="mt-8">
-              <h3 className="mb-4 text-base font-bold uppercase tracking-wider text-muted">
+              <h3 id="more-2d" className="mb-4 text-base font-bold uppercase tracking-wider text-muted scroll-mt-20">
                 More 2D Chinese Anime
               </h3>
               <AnimeGrid items={popular2D.slice(8)} />
@@ -111,9 +111,9 @@ export function DonghuaTabs({ donghuaListTop, popular2D, popular3D, ongoing }: D
 
         {activeTab === "3d" && (
           <div>
-            <AnimeRow title="Top 3D CGI Picks" items={popular3D.slice(0, 8)} />
+            <AnimeRow title="Top 3D CGI Picks" items={popular3D.slice(0, 8)} href="#more-3d" />
             <div className="mt-8">
-              <h3 className="mb-4 text-base font-bold uppercase tracking-wider text-muted">
+              <h3 id="more-3d" className="mb-4 text-base font-bold uppercase tracking-wider text-muted scroll-mt-20">
                 More 3D Chinese CGI
               </h3>
               <AnimeGrid items={popular3D.slice(8)} />
@@ -123,9 +123,9 @@ export function DonghuaTabs({ donghuaListTop, popular2D, popular3D, ongoing }: D
 
         {activeTab === "ongoing" && (
           <div>
-            <AnimeRow title="Airing Chinese Series" items={ongoing.slice(0, 8)} />
+            <AnimeRow title="Airing Chinese Series" items={ongoing.slice(0, 8)} href="#more-ongoing" />
             <div className="mt-8">
-              <h3 className="mb-4 text-base font-bold uppercase tracking-wider text-muted">
+              <h3 id="more-ongoing" className="mb-4 text-base font-bold uppercase tracking-wider text-muted scroll-mt-20">
                 All Ongoing Donghua
               </h3>
               <AnimeGrid items={ongoing.slice(8)} />
