@@ -73,6 +73,20 @@ export const SERVERS: EmbedServer[] = [
     build: ({ slug, episode }) =>
       `https://vidsrc.to/embed/anime/${slug}/${episode}`,
   },
+  {
+    id: "donghuastream",
+    name: "DonghuaStream",
+    supportsDub: false,
+    build: ({ slug, episode }) =>
+      `https://donghuastream.org/${slug}-episode-${episode}/`,
+  },
+  {
+    id: "animexin",
+    name: "AnimeXin",
+    supportsDub: false,
+    build: ({ slug, episode }) =>
+      `https://animexin.dev/${slug}-episode-${episode}/`,
+  },
 ];
 
 export const DEFAULT_SERVER = SERVERS[0];
