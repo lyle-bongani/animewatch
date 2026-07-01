@@ -5,11 +5,13 @@ import { getAnime } from "@/lib/anilist";
 import { AnimeRow } from "@/components/AnimeRow";
 import { WatchlistButton } from "@/components/WatchlistButton";
 import { DetailEpisodes } from "@/components/DetailEpisodes";
+import { DownloadButton } from "@/components/DownloadButton";
 import {
   displayTitle,
   stripHtml,
   formatLabel,
   watchableEpisodes,
+  groupRelations,
   type Anime,
 } from "@/lib/types";
 
@@ -81,6 +83,7 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
               <PlayIcon /> Watch Now
             </Link>
             <WatchlistButton anime={anime} />
+            <DownloadButton anime={anime} />
           </div>
 
           {/* Info */}
@@ -123,55 +126,98 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
 
         {/* Related Seasons & Series */}
         {(() => {
-          const relations = anime.relations?.edges
-            ?.filter((edge) => edge.node.type === "ANIME" && ["SEQUEL", "PREQUEL", "SIDE_STORY", "ALTERNATIVE", "PARENT", "SPIN_OFF"].includes(edge.relationType))
-            ?.map((edge) => ({
-              id: edge.node.id,
-              relationType: edge.relationType,
-              title: displayTitle(edge.node),
-              status: edge.node.status,
-              format: edge.node.format,
-              cover: edge.node.coverImage?.large ?? edge.node.coverImage?.extraLarge ?? "",
-            })) ?? [];
+          const { seasons, moviesAndSpecials } = groupRelations(anime);
 
-          if (relations.length === 0) return null;
+          if (seasons.length <= 1 && moviesAndSpecials.length === 0) return null;
 
           return (
-            <section className="mt-10 border-t border-border/40 pt-8">
-              <h2 className="mb-4 text-xl font-bold">
-                <span className="mr-2 inline-block h-5 w-1 rounded bg-accent align-middle" />
-                Related Seasons & Series
-              </h2>
-              <div className="flex flex-wrap gap-4">
-                {relations.map((rel) => (
-                  <Link
-                    key={rel.id}
-                    href={`/anime/${rel.id}`}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-3 transition-all hover:border-accent/40 hover:bg-surface-3 cursor-pointer shrink-0 max-w-sm"
-                  >
-                    {rel.cover && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={rel.cover}
-                        alt={rel.title}
-                        className="h-16 w-11 rounded object-cover shadow-sm shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0 pr-2">
-                      <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
-                        {rel.relationType.replace(/_/g, " ")}
-                      </span>
-                      <h3 className="mt-1 truncate text-sm font-semibold text-foreground/90">
-                        {rel.title}
-                      </h3>
-                      <p className="text-xs text-muted">
-                        {rel.format} · {prettyStatus(rel.status ?? "")}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            <div className="mt-10 border-t border-border/40 pt-8 space-y-8">
+              {/* Seasons Grid */}
+              {seasons.length > 1 && (
+                <section>
+                  <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
+                    <span className="inline-block h-5 w-1 rounded bg-accent" />
+                    Seasons
+                  </h2>
+                  <div className="flex flex-wrap gap-4">
+                    {seasons.map((rel) => (
+                      <Link
+                        key={rel.id}
+                        href={`/anime/${rel.id}`}
+                        className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-accent/40 hover:bg-surface-3 cursor-pointer shrink-0 w-full sm:max-w-[280px] ${
+                          rel.isCurrent 
+                            ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                            : "border-border bg-surface-2"
+                        }`}
+                      >
+                        {rel.cover && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rel.cover}
+                            alt={rel.title}
+                            className="h-16 w-11 rounded object-cover shadow-sm shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0 pr-2">
+                          <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+                            Season {rel.seasonNumber} {rel.year ? `(${rel.year})` : ""}
+                          </span>
+                          <h3 className="mt-1 truncate text-sm font-semibold text-foreground/90">
+                            {rel.title}
+                          </h3>
+                          <p className="text-xs text-muted">
+                            {rel.format} · {prettyStatus(rel.status)}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Movies & Specials Grid */}
+              {moviesAndSpecials.length > 0 && (
+                <section>
+                  <h2 className="mb-4 text-xl font-bold flex items-center gap-2">
+                    <span className="inline-block h-5 w-1 rounded bg-accent" />
+                    Movies & Specials
+                  </h2>
+                  <div className="flex flex-wrap gap-4">
+                    {moviesAndSpecials.map((rel) => (
+                      <Link
+                        key={rel.id}
+                        href={`/anime/${rel.id}`}
+                        className={`flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-accent/40 hover:bg-surface-3 cursor-pointer shrink-0 w-full sm:max-w-[280px] ${
+                          rel.isCurrent 
+                            ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                            : "border-border bg-surface-2"
+                        }`}
+                      >
+                        {rel.cover && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rel.cover}
+                            alt={rel.title}
+                            className="h-16 w-11 rounded object-cover shadow-sm shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0 pr-2">
+                          <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent">
+                            {rel.relationType.replace(/_/g, " ")} {rel.year ? `(${rel.year})` : ""}
+                          </span>
+                          <h3 className="mt-1 truncate text-sm font-semibold text-foreground/90">
+                            {rel.title}
+                          </h3>
+                          <p className="text-xs text-muted">
+                            {rel.format} · {prettyStatus(rel.status)}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
           );
         })()}
 

@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { SERVERS, getServer, type AudioType } from "@/lib/servers";
 import type { Anime, StreamingEpisode } from "@/lib/types";
-import { displayTitle, stripHtml, formatLabel } from "@/lib/types";
+import { displayTitle, stripHtml, formatLabel, groupRelations } from "@/lib/types";
 import { AnimeRow } from "./AnimeRow";
+import { DownloadButton } from "./DownloadButton";
 
 interface HistoryEntry {
   id: number;
@@ -91,20 +92,9 @@ export function WatchClient({
 
   const studios = anime.studios?.nodes.map((s) => s.name).filter(Boolean) ?? [];
 
-  const relations = useMemo(() => {
-    return (
-      anime.relations?.edges
-        ?.filter((edge) => edge.node.type === "ANIME" && ["SEQUEL", "PREQUEL", "SIDE_STORY", "ALTERNATIVE", "PARENT", "SPIN_OFF"].includes(edge.relationType))
-        ?.map((edge) => ({
-          id: edge.node.id,
-          relationType: edge.relationType,
-          title: displayTitle(edge.node),
-          status: edge.node.status,
-          format: edge.node.format,
-          cover: edge.node.coverImage?.large ?? edge.node.coverImage?.extraLarge ?? "",
-        })) ?? []
-    );
-  }, [anime.relations]);
+  const groupedRelations = useMemo(() => {
+    return groupRelations(anime);
+  }, [anime]);
 
   function changeEpisode(n: number) {
     setEpisode(n);
@@ -252,6 +242,7 @@ export function WatchClient({
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-xl font-bold">{displayTitle(anime)}</h2>
+                <DownloadButton anime={anime} variant="watch" />
               </div>
 
               {anime.title.native && (
@@ -289,17 +280,21 @@ export function WatchClient({
         </div>
 
         {/* Related Seasons & Series */}
-        {relations.length > 0 && (
+        {groupedRelations.seasons.length > 1 && (
           <aside className="rounded-xl border border-border bg-surface p-4">
             <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
-              Other Seasons / Related
+              Seasons
             </h2>
             <div className="flex flex-col gap-2.5">
-              {relations.map((rel) => (
+              {groupedRelations.seasons.map((rel) => (
                 <Link
                   key={rel.id}
                   href={`/watch/${rel.id}?ep=1`}
-                  className="flex items-center gap-3 rounded-lg border border-border/50 bg-surface-2 p-2.5 transition-colors hover:border-accent/40 hover:bg-surface-3 cursor-pointer"
+                  className={`flex items-center gap-3 rounded-lg border p-2.5 transition-colors hover:border-accent/40 hover:bg-surface-3 cursor-pointer ${
+                    rel.isCurrent 
+                      ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                      : "border-border/50 bg-surface-2"
+                  }`}
                 >
                   {rel.cover && (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -312,7 +307,49 @@ export function WatchClient({
                   )}
                   <div className="min-w-0 flex-1">
                     <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent leading-none">
-                      {rel.relationType.replace(/_/g, " ")}
+                      Season {rel.seasonNumber} {rel.year ? `(${rel.year})` : ""}
+                    </span>
+                    <h3 className="mt-1 truncate text-xs font-semibold text-foreground/90">
+                      {rel.title}
+                    </h3>
+                    <p className="text-[10px] text-muted capitalize mt-0.5">
+                      {rel.format} · {rel.status?.toLowerCase()}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </aside>
+        )}
+
+        {groupedRelations.moviesAndSpecials.length > 0 && (
+          <aside className="rounded-xl border border-border bg-surface p-4">
+            <h2 className="mb-3 text-xs font-bold uppercase tracking-wider text-muted">
+              Movies & Specials
+            </h2>
+            <div className="flex flex-col gap-2.5">
+              {groupedRelations.moviesAndSpecials.map((rel) => (
+                <Link
+                  key={rel.id}
+                  href={`/watch/${rel.id}?ep=1`}
+                  className={`flex items-center gap-3 rounded-lg border p-2.5 transition-colors hover:border-accent/40 hover:bg-surface-3 cursor-pointer ${
+                    rel.isCurrent 
+                      ? "border-accent bg-accent/5 ring-1 ring-accent" 
+                      : "border-border/50 bg-surface-2"
+                  }`}
+                >
+                  {rel.cover && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={rel.cover}
+                      alt=""
+                      loading="lazy"
+                      className="h-12 w-9 rounded object-cover shadow-sm shrink-0"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <span className="inline-block rounded bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent leading-none">
+                      {rel.relationType.replace(/_/g, " ")} {rel.year ? `(${rel.year})` : ""}
                     </span>
                     <h3 className="mt-1 truncate text-xs font-semibold text-foreground/90">
                       {rel.title}

@@ -268,6 +268,8 @@ export async function getAnime(id: number): Promise<Anime | null> {
               status
               title { romaji english native }
               coverImage { large extraLarge color }
+              season
+              seasonYear
             }
           }
         }

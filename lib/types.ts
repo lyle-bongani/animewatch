@@ -53,6 +53,8 @@ export interface Anime {
         status: string;
         title: AnimeTitle;
         coverImage?: CoverImage;
+        season?: string | null;
+        seasonYear?: number | null;
       };
     }[];
   };
@@ -140,4 +142,135 @@ export function castNames(a: Pick<Anime, "characters">, limit = 4): string[] {
       .filter((n): n is string => !!n)
       .slice(0, limit) ?? []
   );
+}
+
+export interface GroupedRelations {
+  seasons: {
+    id: number;
+    title: string;
+    cover: string;
+    format: string;
+    status: string;
+    seasonNumber: number;
+    year: number | null;
+    isCurrent: boolean;
+  }[];
+  moviesAndSpecials: {
+    id: number;
+    title: string;
+    cover: string;
+    format: string;
+    status: string;
+    year: number | null;
+    relationType: string;
+    isCurrent: boolean;
+  }[];
+}
+
+export function groupRelations(currentAnime: Anime): GroupedRelations {
+  const itemsMap = new Map<number, {
+    id: number;
+    title: AnimeTitle;
+    coverImage?: CoverImage;
+    format?: string | null;
+    status?: string | null;
+    season?: string | null;
+    seasonYear?: number | null;
+    relationType?: string;
+  }>();
+
+  itemsMap.set(currentAnime.id, {
+    id: currentAnime.id,
+    title: currentAnime.title,
+    coverImage: currentAnime.coverImage,
+    format: currentAnime.format,
+    status: currentAnime.status,
+    season: currentAnime.season,
+    seasonYear: currentAnime.seasonYear,
+    relationType: "CURRENT",
+  });
+
+  if (currentAnime.relations?.edges) {
+    for (const edge of currentAnime.relations.edges) {
+      if (edge.node.type === "ANIME") {
+        if (["SEQUEL", "PREQUEL", "SIDE_STORY", "ALTERNATIVE", "PARENT", "SPIN_OFF", "SUMMARY"].includes(edge.relationType)) {
+          if (!itemsMap.has(edge.node.id)) {
+            itemsMap.set(edge.node.id, {
+              id: edge.node.id,
+              title: edge.node.title,
+              coverImage: edge.node.coverImage,
+              format: edge.node.format,
+              status: edge.node.status,
+              season: edge.node.season,
+              seasonYear: edge.node.seasonYear,
+              relationType: edge.relationType,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const allItems = Array.from(itemsMap.values());
+
+  const seasonWeights: Record<string, number> = {
+    WINTER: 1,
+    SPRING: 2,
+    SUMMER: 3,
+    FALL: 4,
+    AUTUMN: 4,
+  };
+
+  const getSortScore = (item: typeof allItems[0]) => {
+    const year = item.seasonYear ?? 3000;
+    const seasonVal = item.season ? (seasonWeights[item.season.toUpperCase()] ?? 0) : 0;
+    return year * 10 + seasonVal;
+  };
+
+  const sortedItems = allItems.sort((a, b) => getSortScore(a) - getSortScore(b));
+
+  const seasonsList: GroupedRelations["seasons"] = [];
+  const moviesAndSpecialsList: GroupedRelations["moviesAndSpecials"] = [];
+
+  let seasonIndex = 1;
+
+  for (const item of sortedItems) {
+    const isMovieOrSpecial = 
+      item.format === "MOVIE" || 
+      item.format === "SPECIAL" || 
+      item.format === "OVA" ||
+      (item.relationType === "SIDE_STORY" && item.format !== "TV");
+
+    const coverUrl = item.coverImage?.large ?? item.coverImage?.extraLarge ?? "";
+    const displayTitleStr = item.title.english || item.title.romaji || item.title.native || "Untitled";
+
+    if (isMovieOrSpecial) {
+      moviesAndSpecialsList.push({
+        id: item.id,
+        title: displayTitleStr,
+        cover: coverUrl,
+        format: item.format || "Movie",
+        status: item.status || "Unknown",
+        year: item.seasonYear || null,
+        relationType: item.relationType || "Related",
+        isCurrent: item.id === currentAnime.id,
+      });
+    } else {
+      seasonsList.push({
+        id: item.id,
+        title: displayTitleStr,
+        cover: coverUrl,
+        format: item.format || "TV",
+        status: item.status || "Unknown",
+        seasonNumber: seasonIndex++,
+        year: item.seasonYear || null,
+        isCurrent: item.id === currentAnime.id,
+      });
+    }
+  }
+
+  return {
+    seasons: seasonsList,
+    moviesAndSpecials: moviesAndSpecialsList,
+  };
 }
