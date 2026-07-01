@@ -35,7 +35,7 @@ export function WatchClient({
   const [lightOff, setLightOff] = useState(false);
 
   const server = getServer(serverId);
-  const slug = (anime.title.romaji || anime.title.english || "")
+  const slug = (anime.title.english || anime.title.romaji || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");

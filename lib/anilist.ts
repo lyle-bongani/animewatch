@@ -298,23 +298,23 @@ export async function getDonghuaBySort(
 }
 
 export const DONGHUA_LIST_IDS = [
-  166442, // Renegade Immortal – Xian Ni
-  123616, // A Record of Mortal’s Journey to Immortality
-  124976, // Swallowed Star – Tunshi Xingkong
-  101416, // Soul Land – Douluo Dalu
-  101413, // Battle Through the Heavens – Doupo Cangqiong
-  124977, // Martial Master – Wu Shen Zhu Zai
-  122325, // A Will Eternal – Yi Nian Yong Heng
-  105615, // Stellar Transformation – Xing Chen Bian
-  103444, // Wan Jie Xian Zong – Fairy Legends
-  142738, // Immortality – Yong Sheng
-  131102, // Ten Thousand Worlds – Wan Jie Du Zun
-  157973, // Apotheosis – Bai Lian Cheng Shen
-  181700, // World of Immortals – Chang Sheng Jie
-  143891, // Purple River – Zi Chuan
-  149673, // Throne of Seal – Shen Yin Wangzuo
-  169460, // Against the Gods – Nitian Xie Shen
-  101407, // Tales of Demons and Gods – Yao Shen Ji
+  137653, // Renegade Immortal – Xian Ni
+  115844, // A Record of Mortal’s Journey to Immortality
+  117012, // Swallowed Star – Tunshi Xingkong
+  101920, // Soul Land – Douluo Dalu
+  102464, // Battle Through the Heavens – Doupo Cangqiong
+  117168, // Martial Master – Wu Shen Zhu Zai
+  110595, // A Will Eternal – Yi Nian Yong Heng
+  105626, // Stellar Transformation – Xing Chen Bian
+  103922, // Wan Jie Xian Zong – Fairy Legends
+  126391, // Immortality – Yong Sheng
+  131929, // Ten Thousand Worlds – Wan Jie Du Zun
+  150950, // Apotheosis – Bai Lian Cheng Shen
+  168097, // World of Immortals – Chang Sheng Jie
+  118201, // Purple River – Zi Chuan
+  146409, // Throne of Seal – Shen Yin Wangzuo
+  131073, // Against the Gods – Nitian Xie Shen
+  159581, // Tales of Demons and Gods – Yao Shen Ji
 ];
 
 export async function getAnimeByIds(ids: number[]): Promise<Anime[]> {
