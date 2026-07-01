@@ -59,34 +59,6 @@ export const SERVERS: EmbedServer[] = [
       return `https://vidlink.pro/anime/${id}/${episode}/${type}?fallback=true&primaryColor=e88b52`;
     },
   },
-  {
-    id: "vidlink-donghua",
-    name: "Donghua-1",
-    supportsDub: false,
-    build: ({ slug, episode, type }) =>
-      `https://vidlink.pro/anime/${slug}/${episode}/${type}?fallback=true&primaryColor=e88b52`,
-  },
-  {
-    id: "vidsrcto-donghua",
-    name: "Donghua-2",
-    supportsDub: false,
-    build: ({ slug, episode }) =>
-      `https://vidsrc.to/embed/anime/${slug}/${episode}`,
-  },
-  {
-    id: "donghuastream",
-    name: "DonghuaStream",
-    supportsDub: false,
-    build: ({ slug, episode }) =>
-      `https://donghuastream.org/${slug}-episode-${episode}-multiple-subtitles/`,
-  },
-  {
-    id: "animexin",
-    name: "AnimeXin",
-    supportsDub: false,
-    build: ({ slug, episode }) =>
-      `https://animexin.dev/${slug}-episode-${episode}-subbed/`,
-  },
 ];
 
 export const DEFAULT_SERVER = SERVERS[0];
