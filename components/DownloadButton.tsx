@@ -11,6 +11,7 @@ interface DownloadButtonProps {
 export function DownloadButton({ anime, variant = "details" }: DownloadButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<"single" | "batch">("single");
+  const [downloadMode, setDownloadMode] = useState<"in-app" | "links">("in-app");
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [startEpisode, setStartEpisode] = useState(1);
   const [endEpisode, setEndEpisode] = useState(anime.episodes || 12);
@@ -176,47 +177,90 @@ export function DownloadButton({ anime, variant = "details" }: DownloadButtonPro
                     </select>
                   </div>
 
-                  {/* Links List */}
-                  <div className="space-y-3">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-1">
-                      Download Options
-                    </label>
-                    {getEpisodeLinks(selectedEpisode).map((link, idx) => (
-                      <div
-                        key={idx}
-                        className="flex flex-col justify-between gap-3 rounded-xl border border-border/50 bg-surface-2 p-4 sm:flex-row sm:items-center hover:border-border transition-colors"
-                      >
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-bold text-foreground/90">{link.name}</h4>
-                          <p className="mt-0.5 text-xs text-muted leading-relaxed">
-                            {link.note}
-                          </p>
-                        </div>
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover shrink-0 shadow-md shadow-accent/10"
-                        >
-                          Go to Link
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3.5 w-3.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2.5}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
-                        </a>
-                      </div>
-                    ))}
+                  {/* Downloader Mode Selector */}
+                  <div className="flex border border-border bg-surface-3 p-1 rounded-xl">
+                    <button
+                      type="button"
+                      onClick={() => setDownloadMode("in-app")}
+                      className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                        downloadMode === "in-app"
+                          ? "bg-surface text-accent shadow-sm"
+                          : "text-muted hover:text-foreground"
+                      }`}
+                    >
+                      Download Directly In-App (Recommended)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDownloadMode("links")}
+                      className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                        downloadMode === "links"
+                          ? "bg-surface text-accent shadow-sm"
+                          : "text-muted hover:text-foreground"
+                      }`}
+                    >
+                      View External Mirrors
+                    </button>
                   </div>
+
+                  {/* Download Content */}
+                  {downloadMode === "in-app" ? (
+                    <div className="space-y-4">
+                      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-inner">
+                        <iframe
+                          src={`https://vidlink.pro/download/anime/${malId}/${selectedEpisode}`}
+                          className="absolute inset-0 h-full w-full"
+                          allowFullScreen
+                          scrolling="yes"
+                        />
+                      </div>
+                      <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 text-center text-xs text-foreground/90">
+                        Solve any security checks/captchas inside the box above to trigger the file download. 
+                        If the player is blocked or doesn&apos;t load, switch to <strong>View External Mirrors</strong> above!
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted block mb-1">
+                        Download Options
+                      </label>
+                      {getEpisodeLinks(selectedEpisode).map((link, idx) => (
+                        <div
+                          key={idx}
+                          className="flex flex-col justify-between gap-3 rounded-xl border border-border/50 bg-surface-2 p-4 sm:flex-row sm:items-center hover:border-border transition-colors"
+                        >
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-foreground/90">{link.name}</h4>
+                            <p className="mt-0.5 text-xs text-muted leading-relaxed">
+                              {link.note}
+                            </p>
+                          </div>
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover shrink-0 shadow-md shadow-accent/10"
+                          >
+                            Go to Link
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                              />
+                            </svg>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-5">
