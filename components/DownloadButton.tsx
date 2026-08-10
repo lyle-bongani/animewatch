@@ -31,9 +31,58 @@ const ExternalIcon = () => (
   </svg>
 );
 
-function getSources(title: string, malId: number): DownloadSource[] {
-  const q = encodeURIComponent(title);
-  return [
+function getSources(title: string, malId: number, isChinese = false): DownloadSource[] {
+  const baseSources: DownloadSource[] = [
+    {
+      id: "luciferdonghua",
+      name: "Lucifer Donghua",
+      badge: "Chinese Donghua",
+      badgeColor: "bg-red-500/15 text-red-400",
+      description: "Dedicated Chinese Animation (Donghua) stream & download portal with raw/subbed episodes.",
+      quality: "1080p · 720p · Donghua",
+      icon: null,
+      getUrl: (t) => `https://luciferdonghua.org/?s=${encodeURIComponent(t)}`,
+    },
+    {
+      id: "dailymotion",
+      name: "Dailymotion",
+      badge: "Donghua Stream",
+      badgeColor: "bg-sky-500/15 text-sky-400",
+      description: "Dailymotion uploads and fan-subbed Chinese anime episodes.",
+      quality: "1080p · 720p",
+      icon: null,
+      getUrl: (t) => `https://www.dailymotion.com/search/${encodeURIComponent(t)}`,
+    },
+    {
+      id: "streamwish",
+      name: "StreamWish",
+      badge: "Donghua Host",
+      badgeColor: "bg-amber-500/15 text-amber-400",
+      description: "Fast 1080p video host widely used for Chinese animation embeds.",
+      quality: "1080p · 720p",
+      icon: null,
+      getUrl: (t) => `https://streamwish.to/e/?search=${encodeURIComponent(t)}`,
+    },
+    {
+      id: "filemoon",
+      name: "Filemoon",
+      badge: "Donghua Host",
+      badgeColor: "bg-indigo-500/15 text-indigo-400",
+      description: "Popular high-speed video server hosting raw and subbed Donghua.",
+      quality: "1080p · 720p",
+      icon: null,
+      getUrl: (t) => `https://filemoon.sx/e/?search=${encodeURIComponent(t)}`,
+    },
+    {
+      id: "streamtape",
+      name: "Streamtape",
+      badge: "Donghua Host",
+      badgeColor: "bg-emerald-500/15 text-emerald-400",
+      description: "Direct embed video server utilized for 3D CGI and 2D Chinese series.",
+      quality: "1080p · 720p",
+      icon: null,
+      getUrl: (t) => `https://streamtape.com/search?q=${encodeURIComponent(t)}`,
+    },
     {
       id: "subsplease",
       name: "SubsPlease",
@@ -85,6 +134,13 @@ function getSources(title: string, malId: number): DownloadSource[] {
       getUrl: (t) => `https://animefest.cc/?s=${encodeURIComponent(t)}`,
     },
   ];
+
+  if (isChinese) {
+    return baseSources;
+  }
+  const cnSources = baseSources.slice(0, 2);
+  const otherSources = baseSources.slice(2);
+  return [...otherSources, ...cnSources];
 }
 
 export function DownloadButton({ anime, variant = "details" }: DownloadButtonProps) {
@@ -98,8 +154,9 @@ export function DownloadButton({ anime, variant = "details" }: DownloadButtonPro
   const totalEpisodes = useMemo(() => anime.episodes || 12, [anime.episodes]);
   const animeTitle = useMemo(() => displayTitle(anime), [anime]);
   const malId = anime.idMal || anime.id;
+  const isChinese = anime.countryOfOrigin === "CN";
 
-  const sources = useMemo(() => getSources(animeTitle, malId), [animeTitle, malId]);
+  const sources = useMemo(() => getSources(animeTitle, malId, isChinese), [animeTitle, malId, isChinese]);
 
   // Nyaa batch URL for entire season
   const batchNyaaUrl = `https://nyaa.si/?f=0&c=1_2&q=${encodeURIComponent(animeTitle)}+batch`;

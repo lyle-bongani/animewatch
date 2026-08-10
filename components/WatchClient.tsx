@@ -28,8 +28,12 @@ export function WatchClient({
   initialEpisode: number;
   streamingEpisodes: StreamingEpisode[];
 }) {
+  const isChinese = anime.countryOfOrigin === "CN";
   const [episode, setEpisode] = useState(initialEpisode);
-  const [serverId, setServerId] = useState(SERVERS[0].id);
+  const [serverId, setServerId] = useState(() => {
+    if (isChinese) return "luciferdonghua";
+    return SERVERS.find((s) => s.id === "vidnest")?.id ?? SERVERS[0].id;
+  });
   const [type, setType] = useState<AudioType>("sub");
   const [search, setSearch] = useState("");
   const [iframeKey, setIframeKey] = useState(0);
@@ -214,13 +218,20 @@ export function WatchClient({
                       setServerId(s.id);
                       setIframeKey((k) => k + 1);
                     }}
-                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                       s.id === serverId
                         ? "bg-accent text-white"
                         : "bg-surface-2 text-muted hover:text-foreground"
                     }`}
                   >
-                    {s.name}
+                    <span>{s.name}</span>
+                    {s.isDonghuaSpecialist && (
+                      <span className={`rounded px-1 py-0.5 text-[9px] font-extrabold uppercase ${
+                        s.id === serverId ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-400"
+                      }`}>
+                        CN
+                      </span>
+                    )}
                   </button>
                 ))}
               </div>

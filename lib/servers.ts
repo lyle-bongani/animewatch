@@ -17,11 +17,63 @@ export interface EmbedServer {
   name: string;
   /** Whether this provider offers a dub track. */
   supportsDub: boolean;
+  /** Whether server is specialized for Chinese Donghua. */
+  isDonghuaSpecialist?: boolean;
   /** Build the iframe src for a given anime/episode. */
   build: (params: { anilistId: number; malId?: number | null; episode: number; type: AudioType; slug: string }) => string;
 }
 
 export const SERVERS: EmbedServer[] = [
+  {
+    id: "luciferdonghua",
+    name: "LuciferDonghua",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://luciferdonghua.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
+    id: "streamwish",
+    name: "StreamWish",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://streamwish.to/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
+    },
+  },
+  {
+    id: "filemoon",
+    name: "Filemoon",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://filemoon.sx/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
+    },
+  },
+  {
+    id: "streamtape",
+    name: "Streamtape",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://streamtape.com/search?q=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
+    id: "dailymotion",
+    name: "Dailymotion",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://www.dailymotion.com/search/${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
   {
     id: "vidnest",
     name: "HD-1",
@@ -61,7 +113,7 @@ export const SERVERS: EmbedServer[] = [
   },
 ];
 
-export const DEFAULT_SERVER = SERVERS[0];
+export const DEFAULT_SERVER = SERVERS[2];
 
 export function getServer(id?: string | null): EmbedServer {
   return SERVERS.find((s) => s.id === id) ?? DEFAULT_SERVER;
