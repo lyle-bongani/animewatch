@@ -39,12 +39,49 @@ export function WatchClient({
   const [iframeKey, setIframeKey] = useState(0);
   const [lightOff, setLightOff] = useState(false);
 
+  // Dynamic Lucifer resolved servers
+  const [luciferServers, setLuciferServers] = useState<{ label: string; embedUrl: string }[]>([]);
+  const [selectedLuciferIdx, setSelectedLuciferIdx] = useState(0);
+  const [luciferLoading, setLuciferLoading] = useState(false);
+
   const server = getServer(serverId);
+  const animeTitle = displayTitle(anime);
   const slug = (anime.title.english || anime.title.romaji || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  const src = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type, slug });
+  const defaultSrc = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type, slug });
+
+  // Dynamically resolve Lucifer Donghua iframes when Lucifer server is selected
+  useEffect(() => {
+    if (serverId !== "luciferdonghua") return;
+    let isSubbed = true;
+    setLuciferLoading(true);
+    fetch(`/api/search?mode=lucifer&q=${encodeURIComponent(animeTitle)}&ep=${episode}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isSubbed) return;
+        if (data.servers && data.servers.length > 0) {
+          setLuciferServers(data.servers);
+          setSelectedLuciferIdx(0);
+        } else {
+          setLuciferServers([]);
+        }
+      })
+      .catch((e) => console.error(e))
+      .finally(() => {
+        if (isSubbed) setLuciferLoading(false);
+      });
+
+    return () => {
+      isSubbed = false;
+    };
+  }, [serverId, animeTitle, episode]);
+
+  const activeSrc =
+    serverId === "luciferdonghua" && luciferServers.length > 0
+      ? luciferServers[selectedLuciferIdx]?.embedUrl || defaultSrc
+      : defaultSrc;
 
   // Keep the URL shareable without a full navigation.
   useEffect(() => {
@@ -137,7 +174,46 @@ export function WatchClient({
         {/* Player column */}
         <div className={lightOff ? "relative z-50" : ""}>
           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
-            {server.isExternalHost ? (
+            {serverId === "luciferdonghua" ? (
+              luciferLoading ? (
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center bg-surface">
+                  <span className="h-10 w-10 animate-spin rounded-full border-3 border-accent border-t-transparent" />
+                  <p className="text-sm font-semibold text-muted">Resolving Lucifer Donghua iframe players...</p>
+                </div>
+              ) : luciferServers.length > 0 ? (
+                <iframe
+                  key={`${iframeKey}-${selectedLuciferIdx}`}
+                  src={activeSrc}
+                  title={`${displayTitle(anime)} — Episode ${episode}`}
+                  allowFullScreen
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  referrerPolicy="origin"
+                  className="h-full w-full border-0"
+                />
+              ) : (
+                <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-surface-2 via-surface to-background">
+                  <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground sm:text-xl">
+                    LuciferDonghua Direct Link
+                  </h3>
+                  <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
+                    <span className="font-semibold text-foreground">{displayTitle(anime)}</span> · Episode {episode} page is ready. Open stream below:
+                  </p>
+                  <a
+                    href={defaultSrc}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-white shadow-lg shadow-accent/25 transition-transform hover:scale-105 hover:bg-accent-hover cursor-pointer"
+                  >
+                    Launch LuciferDonghua Stream ↗
+                  </a>
+                </div>
+              )
+            ) : server.isExternalHost ? (
               <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-surface-2 via-surface to-background">
                 <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -148,26 +224,21 @@ export function WatchClient({
                   {server.name} Stream Host
                 </h3>
                 <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
-                  <span className="font-semibold text-foreground">{displayTitle(anime)}</span> · Episode {episode} is hosted on {server.name}. Click below to launch the video stream on their site.
+                  <span className="font-semibold text-foreground">{displayTitle(anime)}</span> · Episode {episode} is hosted on {server.name}. Click below to launch:
                 </p>
                 <a
-                  href={src}
+                  href={defaultSrc}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-white shadow-lg shadow-accent/25 transition-transform hover:scale-105 hover:bg-accent-hover cursor-pointer"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
                   Launch {server.name} Stream ↗
                 </a>
               </div>
             ) : (
               <iframe
                 key={iframeKey}
-                src={src}
+                src={defaultSrc}
                 title={`${displayTitle(anime)} — Episode ${episode}`}
                 allowFullScreen
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
@@ -265,6 +336,31 @@ export function WatchClient({
                 ))}
               </div>
             </div>
+
+            {/* Resolved Lucifer Donghua mirrors bar */}
+            {serverId === "luciferdonghua" && luciferServers.length > 0 && (
+              <div className="mt-3.5 border-t border-border/50 pt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-accent">
+                    Lucifer Stream Mirrors:
+                  </span>
+                  {luciferServers.map((srv, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedLuciferIdx(idx)}
+                      className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-all ${
+                        selectedLuciferIdx === idx
+                          ? "bg-white text-black shadow-sm"
+                          : "bg-surface-2 text-muted hover:text-foreground"
+                      }`}
+                    >
+                      {srv.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <p className="mt-3 text-xs text-muted">
               If a video doesn&apos;t load or shows an error, switch to another
               server or audio track above. Playback is provided by third parties.
