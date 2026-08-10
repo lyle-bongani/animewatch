@@ -19,61 +19,13 @@ export interface EmbedServer {
   supportsDub: boolean;
   /** Whether server is specialized for Chinese Donghua. */
   isDonghuaSpecialist?: boolean;
+  /** Whether server is an external search/host player rather than an unblocked inline iframe. */
+  isExternalHost?: boolean;
   /** Build the iframe src for a given anime/episode. */
   build: (params: { anilistId: number; malId?: number | null; episode: number; type: AudioType; slug: string }) => string;
 }
 
 export const SERVERS: EmbedServer[] = [
-  {
-    id: "luciferdonghua",
-    name: "LuciferDonghua",
-    supportsDub: false,
-    isDonghuaSpecialist: true,
-    build: ({ slug, episode }) => {
-      const cleanSlug = slug.replace(/-/g, " ");
-      return `https://luciferdonghua.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
-    },
-  },
-  {
-    id: "streamwish",
-    name: "StreamWish",
-    supportsDub: false,
-    isDonghuaSpecialist: true,
-    build: ({ slug, episode }) => {
-      const cleanSlug = slug.replace(/-/g, " ");
-      return `https://streamwish.to/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
-    },
-  },
-  {
-    id: "filemoon",
-    name: "Filemoon",
-    supportsDub: false,
-    isDonghuaSpecialist: true,
-    build: ({ slug, episode }) => {
-      const cleanSlug = slug.replace(/-/g, " ");
-      return `https://filemoon.sx/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
-    },
-  },
-  {
-    id: "streamtape",
-    name: "Streamtape",
-    supportsDub: false,
-    isDonghuaSpecialist: true,
-    build: ({ slug, episode }) => {
-      const cleanSlug = slug.replace(/-/g, " ");
-      return `https://streamtape.com/search?q=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
-    },
-  },
-  {
-    id: "dailymotion",
-    name: "Dailymotion",
-    supportsDub: false,
-    isDonghuaSpecialist: true,
-    build: ({ slug, episode }) => {
-      const cleanSlug = slug.replace(/-/g, " ");
-      return `https://www.dailymotion.com/search/${encodeURIComponent(cleanSlug + " episode " + episode)}`;
-    },
-  },
   {
     id: "vidnest",
     name: "HD-1",
@@ -82,25 +34,11 @@ export const SERVERS: EmbedServer[] = [
       `https://vidnest.fun/anime/${anilistId}/${episode}/${type}`,
   },
   {
-    id: "embedsu",
-    name: "HD-2",
-    supportsDub: false,
-    build: ({ anilistId, episode }) =>
-      `https://embed.su/embed/anime/ani${anilistId}/${episode}`,
-  },
-  {
     id: "vidsrc",
     name: "VidCloud-1",
     supportsDub: true,
     build: ({ anilistId, episode, type }) =>
       `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${episode}/${type}?autoPlay=false`,
-  },
-  {
-    id: "vidsrcto",
-    name: "VidCloud-2",
-    supportsDub: false,
-    build: ({ anilistId, episode }) =>
-      `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`,
   },
   {
     id: "vidlink",
@@ -111,9 +49,78 @@ export const SERVERS: EmbedServer[] = [
       return `https://vidlink.pro/anime/${id}/${episode}/${type}?fallback=true&primaryColor=e88b52`;
     },
   },
+  {
+    id: "luciferdonghua",
+    name: "LuciferDonghua",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    isExternalHost: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://luciferdonghua.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
+    id: "dailymotion",
+    name: "Dailymotion",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    isExternalHost: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://www.dailymotion.com/search/${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
+    id: "streamwish",
+    name: "StreamWish",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    isExternalHost: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://streamwish.to/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
+    },
+  },
+  {
+    id: "filemoon",
+    name: "Filemoon",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    isExternalHost: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://filemoon.sx/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
+    },
+  },
+  {
+    id: "streamtape",
+    name: "Streamtape",
+    supportsDub: false,
+    isDonghuaSpecialist: true,
+    isExternalHost: true,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://streamtape.com/search?q=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
+    id: "embedsu",
+    name: "HD-2",
+    supportsDub: false,
+    build: ({ anilistId, episode }) =>
+      `https://embed.su/embed/anime/ani${anilistId}/${episode}`,
+  },
+  {
+    id: "vidsrcto",
+    name: "VidCloud-2",
+    supportsDub: false,
+    build: ({ anilistId, episode }) =>
+      `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`,
+  },
 ];
 
-export const DEFAULT_SERVER = SERVERS[2];
+export const DEFAULT_SERVER = SERVERS[0];
 
 export function getServer(id?: string | null): EmbedServer {
   return SERVERS.find((s) => s.id === id) ?? DEFAULT_SERVER;

@@ -137,15 +137,44 @@ export function WatchClient({
         {/* Player column */}
         <div className={lightOff ? "relative z-50" : ""}>
           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
-            <iframe
-              key={iframeKey}
-              src={src}
-              title={`${displayTitle(anime)} — Episode ${episode}`}
-              allowFullScreen
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              referrerPolicy="origin"
-              className="h-full w-full"
-            />
+            {server.isExternalHost ? (
+              <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-surface-2 via-surface to-background">
+                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-foreground sm:text-xl">
+                  {server.name} Stream Host
+                </h3>
+                <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
+                  <span className="font-semibold text-foreground">{displayTitle(anime)}</span> · Episode {episode} is hosted on {server.name}. Click below to launch the video stream on their site.
+                </p>
+                <a
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-white shadow-lg shadow-accent/25 transition-transform hover:scale-105 hover:bg-accent-hover cursor-pointer"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Launch {server.name} Stream ↗
+                </a>
+              </div>
+            ) : (
+              <iframe
+                key={iframeKey}
+                src={src}
+                title={`${displayTitle(anime)} — Episode ${episode}`}
+                allowFullScreen
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                referrerPolicy="origin"
+                className="h-full w-full"
+              />
+            )}
           </div>
 
           {/* Controls */}
