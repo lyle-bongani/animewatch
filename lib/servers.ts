@@ -65,7 +65,6 @@ export const SERVERS: EmbedServer[] = [
     name: "Dailymotion",
     supportsDub: false,
     isDonghuaSpecialist: true,
-    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://www.dailymotion.com/search/${encodeURIComponent(cleanSlug + " episode " + episode)}`;
