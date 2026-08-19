@@ -313,22 +313,29 @@ export async function getDonghuaBySort(
 }
 
 export const DONGHUA_LIST_IDS = [
+  165524, // 100,000 Years of Qi Refining – Lian Qi Shiwan Nian
   137653, // Renegade Immortal – Xian Ni
+  120218, // Perfect World – Wanmei Shijie
+  137671, // Shrouding the Heavens – Zhe Tian
   115844, // A Record of Mortal’s Journey to Immortality
   117012, // Swallowed Star – Tunshi Xingkong
   101920, // Soul Land – Douluo Dalu
   102464, // Battle Through the Heavens – Doupo Cangqiong
+  150950, // Apotheosis – Bai Lian Cheng Shen
+  146409, // Throne of Seal – Shen Yin Wangzuo
+  131073, // Against the Gods – Nitian Xie Shen
   117168, // Martial Master – Wu Shen Zhu Zai
   110595, // A Will Eternal – Yi Nian Yong Heng
   105626, // Stellar Transformation – Xing Chen Bian
+  109009, // Lord of the Universe – Wan Jie Shenzhu
+  122521, // Peerless Martial Spirit – Jueshi Wu Hun
+  119924, // Supreme God Emperor – Wu Shang Shen Di
+  107744, // Martial Universe – Wu Dong Qiankun
   103922, // Wan Jie Xian Zong – Fairy Legends
   126391, // Immortality – Yong Sheng
   131929, // Ten Thousand Worlds – Wan Jie Du Zun
-  150950, // Apotheosis – Bai Lian Cheng Shen
   168097, // World of Immortals – Chang Sheng Jie
   118201, // Purple River – Zi Chuan
-  146409, // Throne of Seal – Shen Yin Wangzuo
-  131073, // Against the Gods – Nitian Xie Shen
   159581, // Tales of Demons and Gods – Yao Shen Ji
 ];
 

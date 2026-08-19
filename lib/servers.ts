@@ -69,6 +69,24 @@ export const SERVERS: EmbedServer[] = [
     },
   },
   {
+    id: "keyrafara",
+    name: "Keyrafara",
+    supportsDub: false,
+    build: ({ slug }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://www.keyrafara.com/streaming/donghub?query=${encodeURIComponent(cleanSlug)}`;
+    },
+  },
+  {
+    id: "donghuastream",
+    name: "DonghuaStream",
+    supportsDub: false,
+    build: ({ slug, episode }) => {
+      const cleanSlug = slug.replace(/-/g, " ");
+      return `https://donghuastream.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
+    },
+  },
+  {
     id: "streamwish",
     name: "StreamWish",
     supportsDub: false,

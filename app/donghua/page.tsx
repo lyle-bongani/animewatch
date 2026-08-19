@@ -14,7 +14,7 @@ export default async function DonghuaPage() {
     getDonghuaBySort(["TRENDING_DESC"], 5),
     getDonghuaBySort(["POPULARITY_DESC"], 20, { is3D: false }),
     getDonghuaBySort(["POPULARITY_DESC"], 20, { is3D: true }),
-    getDonghuaBySort(["POPULARITY_DESC"], 20, { status: "RELEASING" }),
+    getDonghuaBySort(["UPDATED_AT_DESC", "TRENDING_DESC"], 24, { status: "RELEASING" }),
     getAnimeByIds(DONGHUA_LIST_IDS),
   ]);
 

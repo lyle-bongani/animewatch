@@ -1,21 +1,21 @@
-async function testEmbeds() {
-  const anime = 'Renegade Immortal';
-  const ep = 80;
-  
-  // 1. Filemoon search / embed test
-  try {
-    const fmUrl = `https://filemoon.sx/e/?search=${encodeURIComponent(anime + ' ' + ep)}`;
-    console.log('Testing Filemoon:', fmUrl);
-    const fmRes = await fetch(fmUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    console.log('Filemoon status:', fmRes.status);
-  } catch(e) { console.error('Filemoon err:', e.message); }
+async function testNewServers() {
+  const anime = '100.000 Years of Refining Qi';
+  const ep = 1;
 
-  // 2. StreamWish search / embed test
+  // Keyrafara
   try {
-    const swUrl = `https://streamwish.to/e/?search=${encodeURIComponent(anime + ' ' + ep)}`;
-    console.log('Testing StreamWish:', swUrl);
-    const swRes = await fetch(swUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    console.log('StreamWish status:', swRes.status);
-  } catch(e) { console.error('StreamWish err:', e.message); }
+    const kUrl = `https://www.keyrafara.com/streaming/donghub?query=${encodeURIComponent(anime)}`;
+    console.log('Testing Keyrafara:', kUrl);
+    const kRes = await fetch(kUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    console.log('Keyrafara status:', kRes.status);
+  } catch(e) { console.error('Keyrafara err:', e.message); }
+
+  // DonghuaStream
+  try {
+    const dsUrl = `https://donghuastream.org/?s=${encodeURIComponent(anime + ' episode ' + ep)}`;
+    console.log('Testing DonghuaStream:', dsUrl);
+    const dsRes = await fetch(dsUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    console.log('DonghuaStream status:', dsRes.status);
+  } catch(e) { console.error('DonghuaStream err:', e.message); }
 }
-testEmbeds();
+testNewServers();
