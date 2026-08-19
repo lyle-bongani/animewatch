@@ -54,6 +54,7 @@ export function WatchClient({
   const [dailymotionVideos, setDailymotionVideos] = useState<DailymotionVideo[]>([]);
   const [selectedDailymotionIdx, setSelectedDailymotionIdx] = useState(0);
   const [dailymotionLoading, setDailymotionLoading] = useState(false);
+  const [dmSearchInput, setDmSearchInput] = useState("");
 
   const server = getServer(serverId);
   const animeTitle = displayTitle(anime);
@@ -62,6 +63,26 @@ export function WatchClient({
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
   const defaultSrc = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type, slug });
+
+  function searchCustomDailymotion(queryToSearch?: string) {
+    const term = (queryToSearch !== undefined ? queryToSearch : dmSearchInput).trim();
+    if (!term) return;
+    setDailymotionLoading(true);
+    fetch(`/api/dailymotion?custom=${encodeURIComponent(term)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.videos && data.videos.length > 0) {
+          setDailymotionVideos(data.videos);
+          setSelectedDailymotionIdx(0);
+        } else {
+          setDailymotionVideos([]);
+        }
+      })
+      .catch((e) => console.error("Custom Dailymotion search error:", e))
+      .finally(() => {
+        setDailymotionLoading(false);
+      });
+  }
 
   // Dynamically resolve Lucifer Donghua iframes when Lucifer server is selected
   useEffect(() => {
@@ -94,6 +115,7 @@ export function WatchClient({
     if (serverId !== "dailymotion") return;
     let isSubbed = true;
     setDailymotionLoading(true);
+    setDmSearchInput(`${animeTitle} episode ${episode}`);
     const nativeTitle = anime.title.native || "";
     fetch(
       `/api/dailymotion?q=${encodeURIComponent(animeTitle)}&ep=${episode}&native=${encodeURIComponent(nativeTitle)}`
@@ -266,15 +288,17 @@ export function WatchClient({
                   <p className="text-sm font-semibold text-muted">Searching Dailymotion for Episode {episode} streams...</p>
                 </div>
               ) : dailymotionVideos.length > 0 ? (
-                <iframe
-                  key={`dm-${iframeKey}-${selectedDailymotionIdx}`}
-                  src={dailymotionSrc}
-                  title={`${displayTitle(anime)} — Episode ${episode} (Dailymotion)`}
-                  allowFullScreen
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen; web-share"
-                  referrerPolicy="origin"
-                  className="h-full w-full border-0"
-                />
+                <div className="relative h-full w-full">
+                  <iframe
+                    key={`dm-${iframeKey}-${selectedDailymotionIdx}`}
+                    src={dailymotionSrc}
+                    title={`${displayTitle(anime)} — Episode ${episode} (Dailymotion)`}
+                    allowFullScreen
+                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen; web-share"
+                    referrerPolicy="origin"
+                    className="h-full w-full border-0"
+                  />
+                </div>
               ) : (
                 <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-surface-2 via-surface to-background">
                   <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner">
@@ -283,19 +307,42 @@ export function WatchClient({
                     </svg>
                   </div>
                   <h3 className="text-lg font-bold text-foreground sm:text-xl">
-                    No Dailymotion Embeds Found
+                    No Direct Matches Found
                   </h3>
-                  <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
-                    No direct Dailymotion uploads matched &quot;{displayTitle(anime)} Episode {episode}&quot;. Search Dailymotion directly:
+                  <p className="mt-1 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
+                    Search Dailymotion with a custom keyword or sub group:
                   </p>
-                  <a
-                    href={defaultSrc}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-white shadow-lg shadow-accent/25 transition-transform hover:scale-105 hover:bg-accent-hover cursor-pointer"
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      searchCustomDailymotion();
+                    }}
+                    className="mt-4 flex w-full max-w-sm items-center gap-2"
                   >
-                    Search on Dailymotion ↗
-                  </a>
+                    <input
+                      type="text"
+                      value={dmSearchInput}
+                      onChange={(e) => setDmSearchInput(e.target.value)}
+                      placeholder={`e.g. ${animeTitle} ${episode}`}
+                      className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-accent px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover cursor-pointer"
+                    >
+                      Search
+                    </button>
+                  </form>
+                  <div className="mt-3 flex items-center gap-2">
+                    <a
+                      href={defaultSrc}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-accent underline hover:text-accent-hover"
+                    >
+                      Open Dailymotion in new tab ↗
+                    </a>
+                  </div>
                 </div>
               )
             ) : server.isExternalHost ? (
@@ -447,54 +494,92 @@ export function WatchClient({
             )}
 
             {/* Resolved Dailymotion Uploads bar */}
-            {serverId === "dailymotion" && dailymotionVideos.length > 0 && (
+            {serverId === "dailymotion" && (
               <div className="mt-3.5 border-t border-border/50 pt-3">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
-                      <span>🎬</span> Dailymotion Video Uploads ({dailymotionVideos.length}):
+                      <span>🎬</span> Dailymotion Streams {dailymotionVideos.length > 0 ? `(${dailymotionVideos.length})` : ""}:
                     </span>
-                    <span className="text-[11px] text-muted">
-                      Select an upload if video quality or subtitles vary
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted hidden sm:inline">
+                        If a stream is deleted/blocked, pick another below or search
+                      </span>
+                      {dailymotionVideos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedDailymotionIdx((idx) => (idx + 1) % dailymotionVideos.length)}
+                          className="rounded bg-surface-2 px-2 py-1 text-xs font-semibold text-accent hover:bg-surface-3 hover:text-white transition-colors cursor-pointer"
+                        >
+                          Next Mirror ↻
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {dailymotionVideos.map((vid, idx) => (
-                      <button
-                        key={vid.id}
-                        onClick={() => setSelectedDailymotionIdx(idx)}
-                        className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-all cursor-pointer ${
-                          selectedDailymotionIdx === idx
-                            ? "border-accent bg-accent/10 ring-1 ring-accent"
-                            : "border-border/60 bg-surface-2 hover:border-border hover:bg-surface-3"
-                        }`}
-                      >
-                        {vid.thumbnail_240_url && (
-                          <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded bg-black">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={vid.thumbnail_240_url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                            {vid.duration ? (
-                              <span className="absolute bottom-0.5 right-0.5 rounded bg-black/80 px-1 text-[9px] font-bold text-white">
-                                {formatDuration(vid.duration)}
-                              </span>
-                            ) : null}
+
+                  {/* Search query input */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      searchCustomDailymotion();
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={dmSearchInput}
+                      onChange={(e) => setDmSearchInput(e.target.value)}
+                      placeholder={`Search custom title (e.g. ${animeTitle} episode ${episode})...`}
+                      className="flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={dailymotionLoading}
+                      className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-50 cursor-pointer"
+                    >
+                      {dailymotionLoading ? "Searching..." : "Search"}
+                    </button>
+                  </form>
+
+                  {dailymotionVideos.length > 0 && (
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {dailymotionVideos.map((vid, idx) => (
+                        <button
+                          key={vid.id}
+                          onClick={() => setSelectedDailymotionIdx(idx)}
+                          className={`flex items-center gap-2.5 rounded-lg border p-2 text-left transition-all cursor-pointer ${
+                            selectedDailymotionIdx === idx
+                              ? "border-accent bg-accent/10 ring-1 ring-accent"
+                              : "border-border/60 bg-surface-2 hover:border-border hover:bg-surface-3"
+                          }`}
+                        >
+                          {vid.thumbnail_240_url && (
+                            <div className="relative h-12 w-20 shrink-0 overflow-hidden rounded bg-black">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={vid.thumbnail_240_url}
+                                alt=""
+                                className="h-full w-full object-cover"
+                              />
+                              {vid.duration ? (
+                                <span className="absolute bottom-0.5 right-0.5 rounded bg-black/80 px-1 text-[9px] font-bold text-white">
+                                  {formatDuration(vid.duration)}
+                                </span>
+                              ) : null}
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <h4 className="line-clamp-1 text-xs font-semibold text-foreground">
+                              {vid.title}
+                            </h4>
+                            <p className="mt-0.5 text-[10px] text-muted">
+                              {vid.owner?.screenname || "Dailymotion"} · {formatViews(vid.views_total)}
+                            </p>
                           </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <h4 className="line-clamp-1 text-xs font-semibold text-foreground">
-                            {vid.title}
-                          </h4>
-                          <p className="mt-0.5 text-[10px] text-muted">
-                            {vid.owner?.screenname || "Dailymotion"} · {formatViews(vid.views_total)}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

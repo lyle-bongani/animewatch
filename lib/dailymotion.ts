@@ -48,7 +48,8 @@ export function getDailymotionEmbedUrl(videoId: string, autoplay = false): strin
 
 export async function searchDailymotion(
   query: string,
-  limit = 10
+  limit = 15,
+  minMinutes = 3
 ): Promise<DailymotionVideo[]> {
   try {
     const fields = [
@@ -64,11 +65,15 @@ export async function searchDailymotion(
       "owner.screenname",
     ].join(",");
 
-    const url = `https://api.dailymotion.com/videos?search=${encodeURIComponent(
+    let url = `https://api.dailymotion.com/videos?search=${encodeURIComponent(
       query
     )}&fields=${fields}&limit=${limit}&flags=no_live`;
 
-    const res = await fetch(url, {
+    if (minMinutes > 0) {
+      url += `&longer_than=${minMinutes}`;
+    }
+
+    let res = await fetch(url, {
       headers: {
         Accept: "application/json",
       },
@@ -81,8 +86,26 @@ export async function searchDailymotion(
       return [];
     }
 
-    const data = (await res.json()) as DailymotionSearchResponse;
-    return data.list || [];
+    let data = (await res.json()) as DailymotionSearchResponse;
+    let list = data.list || [];
+
+    // If longer_than returned 0 results, retry without duration filter as fallback
+    if (list.length === 0 && minMinutes > 0) {
+      const fallbackUrl = `https://api.dailymotion.com/videos?search=${encodeURIComponent(
+        query
+      )}&fields=${fields}&limit=${limit}&flags=no_live`;
+      const fallbackRes = await fetch(fallbackUrl, {
+        headers: { Accept: "application/json" },
+        next: { revalidate: 1800 },
+        signal: AbortSignal.timeout(6000),
+      });
+      if (fallbackRes.ok) {
+        const fallbackData = (await fallbackRes.json()) as DailymotionSearchResponse;
+        list = fallbackData.list || [];
+      }
+    }
+
+    return list;
   } catch (err) {
     console.error("Dailymotion search failed:", err);
     return [];
