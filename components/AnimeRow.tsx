@@ -47,25 +47,25 @@ export function AnimeRow({
       <div className="relative">
         <div
           ref={scroller}
-          className="nflx-row no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-10 sm:gap-4"
+          className="nflx-row no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-10 touch-pan-x sm:gap-4"
         >
           {items.map((a, i) => (
             <div
               key={a.id}
               className={`nflx-item shrink-0 ${
-                numbered ? "flex w-56 items-end gap-1 sm:w-60" : "w-36 sm:w-40 md:w-44"
+                numbered ? "flex w-44 items-end gap-1 sm:w-56 lg:w-60" : "w-32 sm:w-40 md:w-44"
               }`}
             >
               {numbered && (
                 <span
                   aria-hidden
-                  className="select-none text-[5.5rem] font-black leading-[0.8] text-transparent sm:text-[7rem]"
+                  className="select-none text-[4.5rem] font-black leading-[0.8] text-transparent sm:text-[5.5rem] lg:text-[7rem]"
                   style={{ WebkitTextStroke: "2px var(--color-border)" }}
                 >
                   {i + 1}
                 </span>
               )}
-              <div className={numbered ? "w-32 shrink-0 sm:w-36" : "w-full"}>
+              <div className={numbered ? "w-28 shrink-0 sm:w-32 lg:w-36" : "w-full"}>
                 <AnimeCard anime={a} />
               </div>
             </div>

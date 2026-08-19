@@ -32,7 +32,7 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
   const match = matchPercent(a);
 
   return (
-    <section className="relative h-[100vh] min-h-[600px] w-full overflow-hidden">
+    <section className="relative h-[65vh] min-h-[480px] w-full overflow-hidden sm:h-[80vh] lg:h-screen">
       {/* Billboard background */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -41,27 +41,27 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
         alt=""
         className="animate-fade-in absolute inset-0 h-full w-full object-cover"
       />
-      {/* Netflix-style gradients: dark from the left for text, fade to page at the bottom */}
+      {/* Netflix-style gradients */}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
 
       {/* Content */}
-      <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-20 sm:px-8 sm:pb-28">
+      <div className="relative mx-auto flex h-full max-w-7xl items-end px-4 pb-16 sm:px-8 sm:pb-28">
         <div className="max-w-xl">
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-2 flex items-center gap-2 sm:mb-3">
             <span className="rounded bg-accent px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
               Top 10
             </span>
-            <span className="text-sm font-semibold text-foreground/80">
+            <span className="text-xs font-semibold text-foreground/80 sm:text-sm">
               #{index + 1} in Anime Today
             </span>
           </div>
 
-          <h1 className="type-display text-4xl text-white drop-shadow-lg sm:text-6xl">
+          <h1 className="type-display text-3xl text-white drop-shadow-lg sm:text-5xl lg:text-6xl line-clamp-2">
             {displayTitle(a)}
           </h1>
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:mt-4 sm:gap-x-3 sm:text-sm">
             {match != null && (
               <span className="font-bold text-[color:var(--color-match)]">{match}% Match</span>
             )}
@@ -74,26 +74,26 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
             <span className="rounded bg-white/15 px-1.5 text-xs text-zinc-200">HD</span>
           </div>
 
-          <p className="mt-4 line-clamp-3 max-w-lg text-sm text-foreground/80 drop-shadow sm:text-base">
+          <p className="mt-3 line-clamp-2 max-w-lg text-xs text-foreground/80 drop-shadow sm:mt-4 sm:line-clamp-3 sm:text-sm lg:text-base">
             {stripHtml(a.description) || "No synopsis available."}
           </p>
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            {/* White Play — the signature Netflix billboard button */}
+          <div className="mt-4 flex flex-wrap gap-2 sm:mt-6 sm:gap-3">
+            {/* White Play button */}
             <Link
               href={`/watch/${a.id}`}
-              className="inline-flex items-center gap-2 rounded-[var(--radius-card)] bg-white px-7 py-2.5 text-base font-bold text-black transition-colors hover:bg-white/85"
+              className="inline-flex items-center gap-2 rounded-[var(--radius-card)] bg-white px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-white/85 sm:px-7 sm:py-2.5 sm:text-base"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
               </svg>
               Play
             </Link>
             <Link
               href={`/anime/${a.id}`}
-              className="inline-flex items-center gap-2 rounded-[var(--radius-card)] bg-zinc-500/40 px-7 py-2.5 text-base font-semibold text-white backdrop-blur transition-colors hover:bg-zinc-500/30"
+              className="inline-flex items-center gap-2 rounded-[var(--radius-card)] bg-zinc-500/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition-colors hover:bg-zinc-500/30 sm:px-7 sm:py-2.5 sm:text-base"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 16v-4M12 8h.01" strokeLinecap="round" />
               </svg>
@@ -103,14 +103,14 @@ export function HeroSpotlight({ items }: { items: Anime[] }) {
         </div>
       </div>
 
-      {/* Maturity tag on the right edge (Netflix billboard cue) */}
+      {/* Maturity tag on the right edge */}
       <div className="absolute bottom-28 right-0 hidden items-center gap-2 border-l-2 border-white/60 bg-black/30 py-1 pl-3 pr-6 text-sm text-white backdrop-blur lg:flex">
         {maturityLabel(a)}
       </div>
 
-      {/* Carousel controls */}
+      {/* Carousel controls — pushed up on mobile to clear bottom nav */}
       {count > 1 && (
-        <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2 sm:bottom-10">
+        <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 gap-2 sm:bottom-12">
           {items.map((_, i) => (
             <button
               key={i}

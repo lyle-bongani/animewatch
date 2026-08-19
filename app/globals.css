@@ -205,3 +205,32 @@ body {
   z-index: 20;
   position: relative;
 }
+
+/* ── iOS/Android safe-area utilities ── */
+/* pb-safe: pads the element by the device's bottom safe-area inset (notch/home bar) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* On touch screens, disable the hover physics so cards don't stay scaled */
+@media (hover: none) {
+  .nflx-row .nflx-item,
+  .nflx-row:hover .nflx-item,
+  .nflx-row .nflx-item:hover ~ .nflx-item,
+  .nflx-row:hover .nflx-item:hover,
+  .nflx-row:hover .nflx-item:hover ~ .nflx-item {
+    transform: none !important;
+  }
+  .netflix-grid .netflix-card:hover {
+    transform: none;
+  }
+}
+
+/* scale-in animation for modals sliding up on mobile */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.25, 1, 0.5, 1) both;
+}

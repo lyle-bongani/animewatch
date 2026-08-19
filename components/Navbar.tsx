@@ -90,7 +90,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div ref={boxRef} className="relative flex-1 max-w-xl">
+        <div ref={boxRef} className="relative min-w-0 flex-1 max-w-xl">
           <form onSubmit={submit}>
             <input
               type="search"
