@@ -72,8 +72,6 @@ export const SERVERS: EmbedServer[] = [
     id: "streamwish",
     name: "StreamWish",
     supportsDub: false,
-    isDonghuaSpecialist: true,
-    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://streamwish.to/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
@@ -83,8 +81,6 @@ export const SERVERS: EmbedServer[] = [
     id: "filemoon",
     name: "Filemoon",
     supportsDub: false,
-    isDonghuaSpecialist: true,
-    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://filemoon.sx/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
@@ -94,8 +90,6 @@ export const SERVERS: EmbedServer[] = [
     id: "streamtape",
     name: "Streamtape",
     supportsDub: false,
-    isDonghuaSpecialist: true,
-    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://streamtape.com/search?q=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
