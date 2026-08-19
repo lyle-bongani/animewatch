@@ -450,20 +450,13 @@ export function WatchClient({
                       setServerId(s.id);
                       setIframeKey((k) => k + 1);
                     }}
-                    className={`flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                       s.id === serverId
                         ? "bg-accent text-white"
                         : "bg-surface-2 text-muted hover:text-foreground"
                     }`}
                   >
-                    <span>{s.name}</span>
-                    {s.isDonghuaSpecialist && (
-                      <span className={`rounded px-1 py-0.5 text-[9px] font-extrabold uppercase ${
-                        s.id === serverId ? "bg-white/20 text-white" : "bg-amber-500/20 text-amber-400"
-                      }`}>
-                        CN
-                      </span>
-                    )}
+                    {s.name}
                   </button>
                 ))}
               </div>

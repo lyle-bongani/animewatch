@@ -53,8 +53,6 @@ export const SERVERS: EmbedServer[] = [
     id: "luciferdonghua",
     name: "LuciferDonghua",
     supportsDub: false,
-    isDonghuaSpecialist: true,
-    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://luciferdonghua.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
