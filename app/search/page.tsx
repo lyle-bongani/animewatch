@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AnimeGrid } from "@/components/AnimeGrid";
 import { SearchFilters } from "@/components/SearchFilters";
 import {
@@ -22,7 +23,7 @@ type SP = Promise<{
   sort?: string;
 }>;
 
-// Shortcut queries used by the home page "View all" links.
+// Shortcut queries used by the home page "View All" links.
 const BROWSE: Record<string, { title: string; load: () => Promise<Anime[]> }> = {
   trending: { title: "Trending Now", load: () => getTrending(30) },
   airing: { title: "Airing Now", load: () => getAiringNow(30) },
@@ -32,7 +33,7 @@ const BROWSE: Record<string, { title: string; load: () => Promise<Anime[]> }> = 
 
 export async function generateMetadata({ searchParams }: { searchParams: SP }): Promise<Metadata> {
   const { q } = await searchParams;
-  return { title: q ? `Search: ${q}` : "Search" };
+  return { title: q ? `Search: ${q}` : "Browse Anime" };
 }
 
 export default async function SearchPage({ searchParams }: { searchParams: SP }) {
@@ -70,11 +71,11 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       sort: sort ? [sort] : undefined,
     };
     const res = await searchAnime(query, pageNum, 24, filters);
-    heading = query ? `Results for “${query}”` : "Filtered Results";
+    heading = query ? `Results for "${query}"` : "Filtered Results";
     items = res.media;
     hasNextPage = res.hasNextPage;
   } else {
-    heading = "Browse";
+    heading = "Browse Anime";
     items = await getTrending(30);
   }
 
@@ -92,19 +93,52 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="mb-4 text-2xl font-bold sm:text-3xl">{heading}</h1>
-      
-      {!browse && <SearchFilters />}
-
-      {!browse && (query || hasFilters) && (
-        <p className="mb-6 text-sm text-muted">{items.length} title(s) on this page</p>
-      )}
-
-      <div className="mt-6">
-        <AnimeGrid items={items} />
+    <div className="mx-auto max-w-7xl px-4 pt-6 pb-10 sm:pt-8">
+      {/* Breadcrumb */}
+      <div className="mb-4 flex items-center gap-2 text-sm text-muted">
+        <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+        <span>/</span>
+        <span className="text-foreground">{browse ? browse.title : query ? `"${query}"` : "Search"}</span>
       </div>
 
+      <h1 className="mb-5 text-2xl font-bold sm:text-3xl">{heading}</h1>
+
+      {/* SearchFilters MUST be wrapped in Suspense — it uses useSearchParams() */}
+      {!browse && (
+        <Suspense fallback={
+          <div className="mb-6 h-24 w-full animate-pulse rounded-xl border border-border bg-surface" />
+        }>
+          <SearchFilters />
+        </Suspense>
+      )}
+
+      {!browse && (query || hasFilters) && (
+        <p className="mb-4 text-sm text-muted">{items.length} title(s) found</p>
+      )}
+
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <svg
+            width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
+            strokeLinejoin="round" className="mb-4 text-muted"
+          >
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+          </svg>
+          <h2 className="text-lg font-semibold">No results found</h2>
+          <p className="mt-1 text-sm text-muted">Try a different search term or adjust the filters.</p>
+          <Link
+            href="/search"
+            className="mt-5 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-accent-hover"
+          >
+            Clear Search
+          </Link>
+        </div>
+      ) : (
+        <AnimeGrid items={items} />
+      )}
+
+      {/* Pagination — only for real search/filter queries */}
       {!browse && (query || hasFilters) && (pageNum > 1 || hasNextPage) && (
         <div className="mt-10 flex items-center justify-center gap-3">
           {pageNum > 1 && (
@@ -129,4 +163,3 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
     </div>
   );
 }
-
