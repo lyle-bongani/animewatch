@@ -29,38 +29,67 @@ interface GraphQLResponse<T> {
   errors?: { message: string }[];
 }
 
+// In-memory fallback cache to prevent the site from ever getting stuck if AniList is rate-limited or fails
+const memoryCache = new Map<string, unknown>();
+
 async function gql<T>(
   query: string,
   variables: Record<string, unknown> = {},
   revalidate = 3600,
 ): Promise<T | null> {
-  try {
-    const res = await fetch(ANILIST_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ query, variables }),
-      next: { revalidate },
-      signal: AbortSignal.timeout(4000),
-    });
+  const cacheKey = JSON.stringify({ query, variables });
 
-    if (!res.ok) {
-      console.error(`AniList HTTP ${res.status}`);
-      return null;
-    }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(ANILIST_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ query, variables }),
+        next: { revalidate },
+        signal: AbortSignal.timeout(10000),
+      });
 
-    const json = (await res.json()) as GraphQLResponse<T>;
-    if (json.errors?.length) {
-      console.error("AniList errors:", json.errors.map((e) => e.message).join("; "));
-      return null;
+      if (res.status === 429) {
+        console.warn(`AniList rate limited (429) on attempt ${attempt + 1}. Retrying...`);
+        if (attempt === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          continue;
+        }
+      }
+
+      if (!res.ok) {
+        console.error(`AniList HTTP ${res.status}`);
+        break;
+      }
+
+      const json = (await res.json()) as GraphQLResponse<T>;
+      if (json.errors?.length) {
+        console.error("AniList errors:", json.errors.map((e) => e.message).join("; "));
+        break;
+      }
+
+      if (json.data) {
+        memoryCache.set(cacheKey, json.data);
+        return json.data;
+      }
+    } catch (err) {
+      console.error(`AniList request attempt ${attempt + 1} failed:`, err);
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
     }
-    return json.data ?? null;
-  } catch (err) {
-    console.error("AniList request failed:", err);
-    return null;
   }
+
+  // Fallback to in-memory cached response if available
+  if (memoryCache.has(cacheKey)) {
+    console.warn("Returning in-memory cached AniList data for fallback.");
+    return memoryCache.get(cacheKey) as T;
+  }
+
+  return null;
 }
 
 type PageResult = { Page: { media: Anime[] } };
@@ -137,6 +166,46 @@ export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
     `query ($perPage: Int) {
       Page(page: 1, perPage: $perPage) {
         media(type: ANIME, tag: "Isekai", status: RELEASING, sort: POPULARITY_DESC, isAdult: false) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { perPage },
+  ).then((d) => d?.Page.media ?? []);
+}
+
+export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> {
+  return gql<PageResult>(
+    `query ($perPage: Int, $sort: [MediaSort]) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, format: MOVIE, sort: $sort, isAdult: false) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { perPage, sort },
+  ).then((d) => d?.Page.media ?? []);
+}
+
+export function getSeriesBySort(sort: string[], perPage = 24, status?: string): Promise<Anime[]> {
+  const extra = status ? `, status: ${status}` : "";
+  return gql<PageResult>(
+    `query ($perPage: Int, $sort: [MediaSort]) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, format: TV, sort: $sort, isAdult: false${extra}) {
+          ${CARD_FIELDS}
+        }
+      }
+    }`,
+    { perPage, sort },
+  ).then((d) => d?.Page.media ?? []);
+}
+
+export function getNewReleases(perPage = 24): Promise<Anime[]> {
+  return gql<PageResult>(
+    `query ($perPage: Int) {
+      Page(page: 1, perPage: $perPage) {
+        media(type: ANIME, sort: [START_DATE_DESC, POPULARITY_DESC], isAdult: false) {
           ${CARD_FIELDS}
         }
       }

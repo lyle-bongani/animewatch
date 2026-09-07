@@ -163,13 +163,13 @@ export function Navbar() {
           <Link href="/" className="hover:text-foreground">
             Home
           </Link>
-          <Link href="/search?q=series" className="hover:text-foreground">
+          <Link href="/series" className="hover:text-foreground">
             Series
           </Link>
-          <Link href="/search?q=movies" className="hover:text-foreground">
+          <Link href="/movies" className="hover:text-foreground">
             Movies
           </Link>
-          <Link href="/search?q=new" className="hover:text-foreground">
+          <Link href="/new" className="hover:text-foreground">
             New
           </Link>
           <Link href="/search?q=trending" className="hover:text-foreground">
@@ -199,7 +199,7 @@ export function Navbar() {
           <span className="text-[10px] font-medium">Home</span>
         </Link>
         <Link
-          href="/search?q=series"
+          href="/series"
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -209,7 +209,7 @@ export function Navbar() {
           <span className="text-[10px] font-medium">Series</span>
         </Link>
         <Link
-          href="/search?q=movies"
+          href="/movies"
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -274,21 +274,21 @@ export function Navbar() {
                 Home
               </Link>
               <Link
-                href="/search?q=series"
+                href="/series"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
                 Series
               </Link>
               <Link
-                href="/search?q=movies"
+                href="/movies"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
                 Movies
               </Link>
               <Link
-                href="/search?q=new"
+                href="/new"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
