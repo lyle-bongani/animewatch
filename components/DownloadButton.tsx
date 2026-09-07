@@ -31,7 +31,7 @@ const ExternalIcon = () => (
   </svg>
 );
 
-function getSources(title: string, malId: number, isChinese = false): DownloadSource[] {
+function getSources(title: string, malId: number | string, isChinese = false): DownloadSource[] {
   const baseSources: DownloadSource[] = [
     {
       id: "luciferdonghua",

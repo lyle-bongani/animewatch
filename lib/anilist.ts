@@ -440,6 +440,6 @@ export async function getAnimeByIds(ids: number[]): Promise<Anime[]> {
     { ids },
   );
   const media = data?.Page.media ?? [];
-  return media.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+  return media.sort((a, b) => ids.indexOf(Number(a.id)) - ids.indexOf(Number(b.id)));
 }
 

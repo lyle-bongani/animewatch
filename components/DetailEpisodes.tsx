@@ -7,7 +7,7 @@ export function DetailEpisodes({
   animeId,
   totalEpisodes,
 }: {
-  animeId: number;
+  animeId: number | string;
   totalEpisodes: number;
 }) {
   const [activeTab, setActiveTab] = useState(0);

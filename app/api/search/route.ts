@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { searchAnime } from "@/lib/anilist";
+import { searchCinemeta } from "@/lib/cinemeta";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -133,6 +134,20 @@ export async function GET(request: Request) {
   if (q.length < 2) {
     return NextResponse.json({ results: [] });
   }
-  const { media } = await searchAnime(q, 1, 8);
-  return NextResponse.json({ results: media });
+
+  const [{ media }, cinemeta] = await Promise.all([
+    searchAnime(q, 1, 6).catch(() => ({ media: [] })),
+    searchCinemeta(q, 6).catch(() => []),
+  ]);
+
+  const combined = [...cinemeta, ...media];
+  const seen = new Set<string>();
+  const unique = combined.filter((item) => {
+    const key = `${item.id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return NextResponse.json({ results: unique.slice(0, 10) });
 }

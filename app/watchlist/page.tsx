@@ -5,7 +5,7 @@ import Link from "next/link";
 import { formatLabel } from "@/lib/types";
 
 interface WatchlistItem {
-  id: number;
+  id: number | string;
   title: string;
   coverImage: string;
   format?: string | null;
@@ -35,7 +35,7 @@ export default function WatchlistPage() {
     return () => window.removeEventListener("watchlist-update", loadWatchlist);
   }, []);
 
-  const removeItem = (e: React.MouseEvent, id: number) => {
+  const removeItem = (e: React.MouseEvent, id: number | string) => {
     e.preventDefault();
     e.stopPropagation();
     try {

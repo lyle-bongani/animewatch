@@ -15,7 +15,7 @@ import { AnimeRow } from "./AnimeRow";
 import { DownloadButton } from "./DownloadButton";
 
 interface HistoryEntry {
-  id: number;
+  id: number | string;
   title: string;
   coverImage: string;
   episode: number;
@@ -62,7 +62,21 @@ export function WatchClient({
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  const defaultSrc = server.build({ anilistId: anime.id, malId: anime.idMal, episode, type, slug });
+
+  const currentEpMeta = anime.streamingEpisodes?.[episode - 1];
+  const seasonNum = currentEpMeta?.season || 1;
+  const epNum = currentEpMeta?.episode || episode;
+
+  const defaultSrc = server.build({
+    anilistId: anime.id,
+    malId: anime.idMal,
+    imdbId: anime.imdbId,
+    season: seasonNum,
+    episode: epNum,
+    type,
+    slug,
+    format: anime.format,
+  });
 
   function searchCustomDailymotion(queryToSearch?: string) {
     const term = (queryToSearch !== undefined ? queryToSearch : dmSearchInput).trim();

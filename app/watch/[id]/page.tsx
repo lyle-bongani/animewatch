@@ -1,16 +1,29 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getAnime } from "@/lib/anilist";
+import { findCinemetaItem } from "@/lib/cinemeta";
 import { WatchClient } from "@/components/WatchClient";
-import { displayTitle, watchableEpisodes } from "@/lib/types";
+import { displayTitle, watchableEpisodes, type Anime } from "@/lib/types";
 
 type Params = Promise<{ id: string }>;
 type SP = Promise<{ ep?: string }>;
 
+async function fetchMediaItem(id: string): Promise<Anime | null> {
+  if (id.startsWith("tt") || id.startsWith("movie") || id.startsWith("series")) {
+    return findCinemetaItem(id);
+  }
+  const numericId = Number(id);
+  if (!isNaN(numericId)) {
+    const anime = await getAnime(numericId);
+    if (anime) return anime;
+  }
+  return findCinemetaItem(id);
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
-  const anime = await getAnime(Number(id));
-  return { title: anime ? `Watch ${displayTitle(anime)}` : "Watch" };
+  const item = await fetchMediaItem(id);
+  return { title: item ? `Watch ${displayTitle(item)}` : "Watch" };
 }
 
 export default async function WatchPage({
@@ -22,7 +35,7 @@ export default async function WatchPage({
 }) {
   const { id } = await params;
   const { ep } = await searchParams;
-  const anime = await getAnime(Number(id));
+  const anime = await fetchMediaItem(id);
   if (!anime) notFound();
 
   const totalEpisodes = watchableEpisodes(anime);

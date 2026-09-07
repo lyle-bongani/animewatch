@@ -1,22 +1,23 @@
 import { HeroSpotlight } from "@/components/HeroSpotlight";
 import { AnimeRow } from "@/components/AnimeRow";
-import { getMoviesBySort } from "@/lib/anilist";
+import { getCinemetaMovies } from "@/lib/cinemeta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Anime Movies - Stream Feature Films & Masterpieces",
-  description: "Watch the best animated feature films, trending theatrical releases, and classic anime movies on AnimeWatch.",
+  title: "Movies - Stream Hollywood & Global Blockbusters",
+  description: "Watch trending Hollywood movies, action blockbusters, comedies, sci-fi sagas, and critically acclaimed films in HD.",
 };
 
 export default async function MoviesPage() {
-  const [trending, popular, topRated, latest] = await Promise.all([
-    getMoviesBySort(["TRENDING_DESC", "POPULARITY_DESC"], 18),
-    getMoviesBySort(["POPULARITY_DESC"], 18),
-    getMoviesBySort(["SCORE_DESC"], 18),
-    getMoviesBySort(["START_DATE_DESC"], 18),
+  const [trending, action, scifi, drama, comedy] = await Promise.all([
+    getCinemetaMovies(undefined, 20),
+    getCinemetaMovies("Action", 20),
+    getCinemetaMovies("Sci-Fi", 20),
+    getCinemetaMovies("Drama", 20),
+    getCinemetaMovies("Comedy", 20),
   ]);
 
-  const spotlight = trending.length > 0 ? trending.slice(0, 5) : popular.slice(0, 5);
+  const spotlight = trending.length > 0 ? trending.slice(0, 5) : action.slice(0, 5);
   const hasSpotlight = spotlight.length > 0;
 
   return (
@@ -27,40 +28,47 @@ export default async function MoviesPage() {
         <div className="mx-auto w-full max-w-7xl px-4">
           <h1 className="text-2xl font-bold uppercase tracking-wider sm:text-3xl text-foreground">
             <span className="mr-2.5 inline-block h-6 w-1.5 rounded bg-accent align-middle" />
-            Anime Movies & Theatrical Films
+            Movies & Blockbusters
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Explore animated feature films, award-winning cinematic releases, and classic masterpieces.
+            Explore trending theatrical releases, action blockbusters, award-winning dramas, and classic cinema.
           </p>
         </div>
 
         {trending.length > 0 && (
           <AnimeRow
-            title="Trending Movies"
+            title="Top & Trending Movies"
             items={trending}
-            href="/search?format=MOVIE&sort=TRENDING_DESC"
+            href="/search?q=movies"
             numbered
           />
         )}
-        {popular.length > 0 && (
+        {action.length > 0 && (
           <AnimeRow
-            title="All-Time Popular Movies"
-            items={popular}
-            href="/search?format=MOVIE&sort=POPULARITY_DESC"
+            title="Action & Adventure Blockbusters"
+            items={action}
+            href="/search?q=action%20movies"
           />
         )}
-        {topRated.length > 0 && (
+        {scifi.length > 0 && (
           <AnimeRow
-            title="Critically Acclaimed Masterpieces"
-            items={topRated}
-            href="/search?format=MOVIE&sort=SCORE_DESC"
+            title="Sci-Fi & Fantasy Movies"
+            items={scifi}
+            href="/search?q=scifi%20movies"
           />
         )}
-        {latest.length > 0 && (
+        {drama.length > 0 && (
           <AnimeRow
-            title="Recent Movie Releases"
-            items={latest}
-            href="/search?format=MOVIE&sort=START_DATE_DESC"
+            title="Drama & Thriller Masterpieces"
+            items={drama}
+            href="/search?q=drama%20movies"
+          />
+        )}
+        {comedy.length > 0 && (
+          <AnimeRow
+            title="Comedy & Feel-Good Hits"
+            items={comedy}
+            href="/search?q=comedy%20movies"
           />
         )}
       </div>

@@ -13,11 +13,14 @@ export interface CoverImage {
 export interface StreamingEpisode {
   title?: string | null;
   thumbnail?: string | null;
+  season?: number;
+  episode?: number;
 }
 
 export interface Anime {
-  id: number;
-  idMal?: number | null;
+  id: number | string;
+  idMal?: number | string | null;
+  imdbId?: string | null;
   title: AnimeTitle;
   coverImage: CoverImage;
   bannerImage?: string | null;
@@ -146,7 +149,7 @@ export function castNames(a: Pick<Anime, "characters">, limit = 4): string[] {
 
 export interface GroupedRelations {
   seasons: {
-    id: number;
+    id: number | string;
     title: string;
     cover: string;
     format: string;
@@ -156,7 +159,7 @@ export interface GroupedRelations {
     isCurrent: boolean;
   }[];
   moviesAndSpecials: {
-    id: number;
+    id: number | string;
     title: string;
     cover: string;
     format: string;
@@ -168,8 +171,8 @@ export interface GroupedRelations {
 }
 
 export function groupRelations(currentAnime: Anime): GroupedRelations {
-  const itemsMap = new Map<number, {
-    id: number;
+  const itemsMap = new Map<number | string, {
+    id: number | string;
     title: AnimeTitle;
     coverImage?: CoverImage;
     format?: string | null;

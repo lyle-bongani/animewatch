@@ -10,6 +10,11 @@ import {
   getTopRated,
   getAiringNow,
 } from "@/lib/anilist";
+import {
+  getCinemetaMovies,
+  getCinemetaSeries,
+  searchCinemeta,
+} from "@/lib/cinemeta";
 import type { Anime } from "@/lib/types";
 
 type SP = Promise<{
@@ -29,16 +34,16 @@ const BROWSE: Record<string, { title: string; load: () => Promise<Anime[]> }> = 
   airing: { title: "Airing Now", load: () => getAiringNow(30) },
   top: { title: "Top Rated", load: () => getTopRated(30) },
   popular: { title: "Popular Anime", load: () => getPopular(30) },
-  movies: { title: "Anime Movies", load: () => searchAnime("", 1, 30, { format: "MOVIE", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
-  movie: { title: "Anime Movies", load: () => searchAnime("", 1, 30, { format: "MOVIE", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
-  series: { title: "TV Series", load: () => searchAnime("", 1, 30, { format: "TV", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
-  tv: { title: "TV Series", load: () => searchAnime("", 1, 30, { format: "TV", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
+  movies: { title: "Movies & Blockbusters", load: () => getCinemetaMovies(undefined, 30) },
+  movie: { title: "Movies & Blockbusters", load: () => getCinemetaMovies(undefined, 30) },
+  series: { title: "TV Shows & Series", load: () => getCinemetaSeries(undefined, 30) },
+  tv: { title: "TV Shows & Series", load: () => getCinemetaSeries(undefined, 30) },
   new: { title: "New Releases", load: () => searchAnime("", 1, 30, { sort: ["START_DATE_DESC"] }).then((r) => r.media) },
 };
 
 export async function generateMetadata({ searchParams }: { searchParams: SP }): Promise<Metadata> {
   const { q } = await searchParams;
-  return { title: q ? `Search: ${q}` : "Browse Anime" };
+  return { title: q ? `Search: ${q}` : "Browse Catalog" };
 }
 
 export default async function SearchPage({ searchParams }: { searchParams: SP }) {
@@ -75,12 +80,22 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       seasonYear: year ? parseInt(year, 10) || undefined : undefined,
       sort: sort ? [sort] : undefined,
     };
-    const res = await searchAnime(query, pageNum, 24, filters);
+    const [res, cinemeta] = await Promise.all([
+      searchAnime(query, pageNum, 24, filters).catch(() => ({ media: [], hasNextPage: false })),
+      query && pageNum === 1 ? searchCinemeta(query, 12).catch(() => []) : Promise.resolve([]),
+    ]);
     heading = query ? `Results for "${query}"` : "Filtered Results";
-    items = res.media;
+    const combined = [...cinemeta, ...res.media];
+    const seen = new Set<string>();
+    items = combined.filter((m) => {
+      const key = String(m.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     hasNextPage = res.hasNextPage;
   } else {
-    heading = "Browse Anime";
+    heading = "Browse Catalog";
     items = await getTrending(30);
   }
 

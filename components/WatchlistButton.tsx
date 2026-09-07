@@ -5,7 +5,7 @@ import type { Anime } from "@/lib/types";
 import { displayTitle } from "@/lib/types";
 
 interface WatchlistItem {
-  id: number;
+  id: number | string;
   title: string;
   coverImage: string;
   format?: string | null;

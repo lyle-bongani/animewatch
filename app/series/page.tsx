@@ -1,22 +1,23 @@
 import { HeroSpotlight } from "@/components/HeroSpotlight";
 import { AnimeRow } from "@/components/AnimeRow";
-import { getSeriesBySort } from "@/lib/anilist";
+import { getCinemetaSeries } from "@/lib/cinemeta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Anime Series - Stream TV Shows & Multi-Season Series",
-  description: "Browse the latest and most popular anime TV series, ongoing weekly releases, and classic anime shows on AnimeWatch.",
+  title: "TV Shows & Series - Stream Binge-Worthy TV Hits",
+  description: "Watch trending TV series, crime dramas, comedies, sci-fi shows, and multi-season sagas in HD.",
 };
 
 export default async function SeriesPage() {
-  const [ongoing, trending, popular, topRated] = await Promise.all([
-    getSeriesBySort(["TRENDING_DESC"], 18, "RELEASING"),
-    getSeriesBySort(["TRENDING_DESC", "POPULARITY_DESC"], 18),
-    getSeriesBySort(["POPULARITY_DESC"], 18),
-    getSeriesBySort(["SCORE_DESC"], 18),
+  const [trending, crime, drama, action, comedy] = await Promise.all([
+    getCinemetaSeries(undefined, 20),
+    getCinemetaSeries("Crime", 20),
+    getCinemetaSeries("Drama", 20),
+    getCinemetaSeries("Action", 20),
+    getCinemetaSeries("Comedy", 20),
   ]);
 
-  const spotlight = trending.length > 0 ? trending.slice(0, 5) : popular.slice(0, 5);
+  const spotlight = trending.length > 0 ? trending.slice(0, 5) : crime.slice(0, 5);
   const hasSpotlight = spotlight.length > 0;
 
   return (
@@ -27,40 +28,47 @@ export default async function SeriesPage() {
         <div className="mx-auto w-full max-w-7xl px-4">
           <h1 className="text-2xl font-bold uppercase tracking-wider sm:text-3xl text-foreground">
             <span className="mr-2.5 inline-block h-6 w-1.5 rounded bg-accent align-middle" />
-            Anime TV Series
+            TV Shows & Series
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Discover ongoing anime series, new season premieres, and complete binge-worthy sagas.
+            Discover trending television series, crime sagas, acclaimed dramas, and binge-worthy multi-season shows.
           </p>
         </div>
 
-        {ongoing.length > 0 && (
-          <AnimeRow
-            title="Currently Airing Series"
-            items={ongoing}
-            href="/search?format=TV&status=RELEASING"
-          />
-        )}
         {trending.length > 0 && (
           <AnimeRow
-            title="Trending Series"
+            title="Top & Trending TV Shows"
             items={trending}
-            href="/search?format=TV&sort=TRENDING_DESC"
+            href="/search?q=series"
             numbered
           />
         )}
-        {popular.length > 0 && (
+        {crime.length > 0 && (
           <AnimeRow
-            title="All-Time Most Popular Series"
-            items={popular}
-            href="/search?format=TV&sort=POPULARITY_DESC"
+            title="Crime & Mystery Sagas"
+            items={crime}
+            href="/search?q=crime%20series"
           />
         )}
-        {topRated.length > 0 && (
+        {drama.length > 0 && (
           <AnimeRow
-            title="Top Rated TV Series"
-            items={topRated}
-            href="/search?format=TV&sort=SCORE_DESC"
+            title="Drama & Acclaimed Series"
+            items={drama}
+            href="/search?q=drama%20series"
+          />
+        )}
+        {action.length > 0 && (
+          <AnimeRow
+            title="Action & Sci-Fi Series"
+            items={action}
+            href="/search?q=action%20series"
+          />
+        )}
+        {comedy.length > 0 && (
+          <AnimeRow
+            title="Comedy Series & Sitcoms"
+            items={comedy}
+            href="/search?q=comedy%20series"
           />
         )}
       </div>

@@ -22,7 +22,16 @@ export interface EmbedServer {
   /** Whether server is an external search/host player rather than an unblocked inline iframe. */
   isExternalHost?: boolean;
   /** Build the iframe src for a given anime/episode. */
-  build: (params: { anilistId: number; malId?: number | null; episode: number; type: AudioType; slug: string }) => string;
+  build: (params: {
+    anilistId?: number | string;
+    malId?: number | string | null;
+    imdbId?: string | null;
+    season?: number;
+    episode: number;
+    type: AudioType;
+    slug: string;
+    format?: string | null;
+  }) => string;
 }
 
 export const SERVERS: EmbedServer[] = [
@@ -30,21 +39,38 @@ export const SERVERS: EmbedServer[] = [
     id: "vidnest",
     name: "HD-1",
     supportsDub: true,
-    build: ({ anilistId, episode, type }) =>
-      `https://vidnest.fun/anime/${anilistId}/${episode}/${type}`,
+    build: ({ anilistId, imdbId, format, season, episode, type }) => {
+      if (imdbId) {
+        return format === "MOVIE"
+          ? `https://vidnest.fun/movie/${imdbId}`
+          : `https://vidnest.fun/tv/${imdbId}/${season || 1}/${episode}`;
+      }
+      return `https://vidnest.fun/anime/${anilistId}/${episode}/${type}`;
+    },
   },
   {
     id: "vidsrc",
     name: "VidCloud-1",
     supportsDub: true,
-    build: ({ anilistId, episode, type }) =>
-      `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${episode}/${type}?autoPlay=false`,
+    build: ({ anilistId, imdbId, format, season, episode, type }) => {
+      if (imdbId) {
+        return format === "MOVIE"
+          ? `https://vidsrc.cc/v2/embed/movie/${imdbId}?autoPlay=false`
+          : `https://vidsrc.cc/v2/embed/tv/${imdbId}/${season || 1}/${episode}?autoPlay=false`;
+      }
+      return `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${episode}/${type}?autoPlay=false`;
+    },
   },
   {
     id: "vidlink",
     name: "Vidstream-2",
     supportsDub: true,
-    build: ({ anilistId, malId, episode, type }) => {
+    build: ({ anilistId, malId, imdbId, format, season, episode, type }) => {
+      if (imdbId) {
+        return format === "MOVIE"
+          ? `https://vidlink.pro/movie/${imdbId}?fallback=true&primaryColor=e88b52`
+          : `https://vidlink.pro/tv/${imdbId}/${season || 1}/${episode}?fallback=true&primaryColor=e88b52`;
+      }
       const id = malId || anilistId;
       return `https://vidlink.pro/anime/${id}/${episode}/${type}?fallback=true&primaryColor=e88b52`;
     },
@@ -117,15 +143,27 @@ export const SERVERS: EmbedServer[] = [
     id: "embedsu",
     name: "HD-2",
     supportsDub: false,
-    build: ({ anilistId, episode }) =>
-      `https://embed.su/embed/anime/ani${anilistId}/${episode}`,
+    build: ({ anilistId, imdbId, format, season, episode }) => {
+      if (imdbId) {
+        return format === "MOVIE"
+          ? `https://embed.su/embed/movie/${imdbId}`
+          : `https://embed.su/embed/tv/${imdbId}/${season || 1}/${episode}`;
+      }
+      return `https://embed.su/embed/anime/ani${anilistId}/${episode}`;
+    },
   },
   {
     id: "vidsrcto",
     name: "VidCloud-2",
     supportsDub: false,
-    build: ({ anilistId, episode }) =>
-      `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`,
+    build: ({ anilistId, imdbId, format, season, episode }) => {
+      if (imdbId) {
+        return format === "MOVIE"
+          ? `https://vidsrc.to/embed/movie/${imdbId}`
+          : `https://vidsrc.to/embed/tv/${imdbId}/${season || 1}/${episode}`;
+      }
+      return `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`;
+    },
   },
 ];
 

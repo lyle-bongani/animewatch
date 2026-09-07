@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAnime } from "@/lib/anilist";
+import { findCinemetaItem } from "@/lib/cinemeta";
 import { AnimeRow } from "@/components/AnimeRow";
 import { WatchlistButton } from "@/components/WatchlistButton";
 import { DetailEpisodes } from "@/components/DetailEpisodes";
@@ -17,9 +18,21 @@ import {
 
 type Params = Promise<{ id: string }>;
 
+async function fetchMediaItem(id: string): Promise<Anime | null> {
+  if (id.startsWith("tt") || id.startsWith("movie") || id.startsWith("series")) {
+    return findCinemetaItem(id);
+  }
+  const numericId = Number(id);
+  if (!isNaN(numericId)) {
+    const anime = await getAnime(numericId);
+    if (anime) return anime;
+  }
+  return findCinemetaItem(id);
+}
+
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
-  const anime = await getAnime(Number(id));
+  const anime = await fetchMediaItem(id);
   if (!anime) return { title: "Not found" };
   return {
     title: displayTitle(anime),
@@ -29,7 +42,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 export default async function AnimeDetailPage({ params }: { params: Params }) {
   const { id } = await params;
-  const anime = await getAnime(Number(id));
+  const anime = await fetchMediaItem(id);
   if (!anime) notFound();
 
   const eps = watchableEpisodes(anime);
@@ -225,7 +238,7 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
         <section className="mt-12">
           <h2 className="mb-4 text-xl font-bold">
             <span className="mr-2 inline-block h-5 w-1 rounded bg-accent align-middle" />
-            Episodes
+            {anime.format === "MOVIE" ? "Feature Film" : "Episodes"}
           </h2>
           <DetailEpisodes animeId={anime.id} totalEpisodes={eps} />
         </section>
