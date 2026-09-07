@@ -9,6 +9,16 @@ import {
   searchKitsu,
   getKitsuByGenre,
 } from "./kitsu";
+import {
+  getMalTrending,
+  getMalPopular,
+  getMalTopRated,
+  getMalMovies,
+  getMalSeries,
+  searchMal,
+  getMalAnime,
+  getMalByGenre,
+} from "./mal";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -125,15 +135,19 @@ async function listBySort(
   const list = data?.Page.media;
   if (!list || list.length === 0) {
     if (extra.includes("RELEASING") || (sort && sort[0] === "START_DATE_DESC")) {
-      return getKitsuAiring(perPage);
+      const mal = await getMalTrending(perPage);
+      return mal.length > 0 ? mal : getKitsuAiring(perPage);
     }
     if (sort && sort[0] === "SCORE_DESC") {
-      return getKitsuTopRated(perPage);
+      const mal = await getMalTopRated(perPage);
+      return mal.length > 0 ? mal : getKitsuTopRated(perPage);
     }
     if (sort && sort[0] === "POPULARITY_DESC") {
-      return getKitsuPopular(perPage);
+      const mal = await getMalPopular(perPage);
+      return mal.length > 0 ? mal : getKitsuPopular(perPage);
     }
-    return getKitsuTrending(perPage);
+    const mal = await getMalTrending(perPage);
+    return mal.length > 0 ? mal : getKitsuTrending(perPage);
   }
   return list;
 }
@@ -168,7 +182,8 @@ export function getByGenre(genre: string, perPage = 24): Promise<Anime[]> {
   ).then(async (d) => {
     const list = d?.Page.media;
     if (!list || list.length === 0) {
-      return getKitsuByGenre(genre, perPage);
+      const mal = await getMalByGenre(genre, perPage);
+      return mal.length > 0 ? mal : getKitsuByGenre(genre, perPage);
     }
     return list;
   });
@@ -191,7 +206,8 @@ export function getIsekaiBySort(sort: string[], perPage = 24): Promise<Anime[]> 
   ).then(async (d) => {
     const list = d?.Page.media;
     if (!list || list.length === 0) {
-      return getKitsuByGenre("isekai", perPage);
+      const mal = await getMalByGenre("isekai", perPage);
+      return mal.length > 0 ? mal : getKitsuByGenre("isekai", perPage);
     }
     return list;
   });
@@ -210,7 +226,8 @@ export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
   ).then(async (d) => {
     const list = d?.Page.media;
     if (!list || list.length === 0) {
-      return getKitsuByGenre("isekai", perPage);
+      const mal = await getMalByGenre("isekai", perPage);
+      return mal.length > 0 ? mal : getKitsuByGenre("isekai", perPage);
     }
     return list;
   });
@@ -229,6 +246,8 @@ export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> 
   ).then(async (d) => {
     const list = d?.Page.media;
     if (!list || list.length === 0) {
+      const mal = await getMalMovies(perPage);
+      if (mal.length > 0) return mal;
       const live = await searchKitsu("movie", perPage);
       return live.slice(0, perPage);
     }
@@ -247,10 +266,15 @@ export function getSeriesBySort(sort: string[], perPage = 24, status?: string): 
       }
     }`,
     { perPage, sort },
-  ).then((d) => {
+  ).then(async (d) => {
     const list = d?.Page.media;
     if (!list || list.length === 0) {
-      return status === "RELEASING" ? getKitsuAiring(perPage) : getKitsuPopular(perPage);
+      if (status === "RELEASING") {
+        const mal = await getMalTrending(perPage);
+        return mal.length > 0 ? mal : getKitsuAiring(perPage);
+      }
+      const mal = await getMalSeries(perPage);
+      return mal.length > 0 ? mal : getKitsuPopular(perPage);
     }
     return list;
   });
@@ -266,9 +290,12 @@ export function getNewReleases(perPage = 24): Promise<Anime[]> {
       }
     }`,
     { perPage },
-  ).then((d) => {
+  ).then(async (d) => {
     const list = d?.Page.media;
-    if (!list || list.length === 0) return getKitsuNewReleases(perPage);
+    if (!list || list.length === 0) {
+      const mal = await getMalTrending(perPage);
+      return mal.length > 0 ? mal : getKitsuNewReleases(perPage);
+    }
     return list;
   });
 }
@@ -332,8 +359,16 @@ export async function searchAnime(
   );
   const media = data?.Page.media ?? [];
   if (media.length === 0) {
-    const offset = (page - 1) * Math.min(perPage, 20);
-    if (searchVal && page === 1) {
+    const offset = (page - 1) * perPage;
+    if (searchVal) {
+      const malResults = await searchMal(searchVal, perPage, offset);
+      if (malResults.length > 0) {
+        return {
+          media: malResults,
+          hasNextPage: malResults.length >= perPage,
+          currentPage: page,
+        };
+      }
       const liveKitsu = await searchKitsu(searchVal, perPage);
       return {
         media: liveKitsu,
@@ -341,7 +376,15 @@ export async function searchAnime(
         currentPage: 1,
       };
     } else if (filters?.genres && filters.genres.length > 0) {
-      const liveKitsu = await getKitsuByGenre(filters.genres[0], perPage, offset);
+      const malResults = await getMalByGenre(filters.genres[0], perPage, offset);
+      if (malResults.length > 0) {
+        return {
+          media: malResults,
+          hasNextPage: malResults.length >= perPage,
+          currentPage: page,
+        };
+      }
+      const liveKitsu = await getKitsuByGenre(filters.genres[0], perPage, (page - 1) * Math.min(perPage, 20));
       return {
         media: liveKitsu,
         hasNextPage: liveKitsu.length >= 20,
@@ -390,48 +433,55 @@ export async function getRecentlyAired(page = 1, perPage = 20): Promise<AiringSc
 }
 
 /** Full detail for a single anime, including episodes and recommendations. */
-export async function getAnime(id: number): Promise<Anime | null> {
-  const data = await gql<{ Media: Anime }>(
-    `query ($id: Int) {
-      Media(id: $id, type: ANIME) {
-        ${CARD_FIELDS}
-        description(asHtml: false)
-        studios(isMain: true) { nodes { name } }
-        trailer { id site }
-        streamingEpisodes { title thumbnail }
-        characters(perPage: 8, sort: [ROLE, FAVOURITES_DESC]) {
-          nodes { name { full } }
-        }
-        staff(perPage: 8, sort: RELEVANCE) {
-          edges { role node { name { full } } }
-        }
-        relations {
-          edges {
-            relationType
-            node {
-              id
-              type
-              format
-              status
-              title { romaji english native }
-              coverImage { large extraLarge color }
-              season
-              seasonYear
+export async function getAnime(id: number | string): Promise<Anime | null> {
+  const numId = typeof id === "number" ? id : parseInt(String(id), 10);
+  if (numId && !isNaN(numId)) {
+    const data = await gql<{ Media: Anime }>(
+      `query ($id: Int) {
+        Media(id: $id, type: ANIME) {
+          ${CARD_FIELDS}
+          description(asHtml: false)
+          studios(isMain: true) { nodes { name } }
+          trailer { id site }
+          streamingEpisodes { title thumbnail }
+          characters(perPage: 8, sort: [ROLE, FAVOURITES_DESC]) {
+            nodes { name { full } }
+          }
+          staff(perPage: 8, sort: RELEVANCE) {
+            edges { role node { name { full } } }
+          }
+          relations {
+            edges {
+              relationType
+              node {
+                id
+                type
+                format
+                status
+                title { romaji english native }
+                coverImage { large extraLarge color }
+                season
+                seasonYear
+              }
+            }
+          }
+          recommendations(perPage: 12, sort: RATING_DESC) {
+            nodes {
+              mediaRecommendation {
+                ${CARD_FIELDS}
+              }
             }
           }
         }
-        recommendations(perPage: 12, sort: RATING_DESC) {
-          nodes {
-            mediaRecommendation {
-              ${CARD_FIELDS}
-            }
-          }
-        }
-      }
-    }`,
-    { id },
-  );
-  if (data?.Media) return data.Media;
+      }`,
+      { id: numId },
+    );
+    if (data?.Media) return data.Media;
+
+    const mal = await getMalAnime(numId);
+    if (mal) return mal;
+  }
+
   return getKitsuAnime(id);
 }
 
