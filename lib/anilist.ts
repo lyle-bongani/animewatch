@@ -7,6 +7,7 @@ import {
   getKitsuNewReleases,
   getKitsuAnime,
   searchKitsu,
+  getKitsuByGenre,
 } from "./kitsu";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
@@ -164,7 +165,13 @@ export function getByGenre(genre: string, perPage = 24): Promise<Anime[]> {
       }
     }`,
     { perPage, genre },
-  ).then((d) => d?.Page.media ?? []);
+  ).then(async (d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) {
+      return getKitsuByGenre(genre, perPage);
+    }
+    return list;
+  });
 }
 
 export function getIsekai(perPage = 24): Promise<Anime[]> {
@@ -181,7 +188,13 @@ export function getIsekaiBySort(sort: string[], perPage = 24): Promise<Anime[]> 
       }
     }`,
     { perPage, sort },
-  ).then((d) => d?.Page.media ?? []);
+  ).then(async (d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) {
+      return getKitsuByGenre("isekai", perPage);
+    }
+    return list;
+  });
 }
 
 export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
@@ -194,7 +207,13 @@ export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
       }
     }`,
     { perPage },
-  ).then((d) => d?.Page.media ?? []);
+  ).then(async (d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) {
+      return getKitsuByGenre("isekai", perPage);
+    }
+    return list;
+  });
 }
 
 export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> {
@@ -312,13 +331,22 @@ export async function searchAnime(
     300,
   );
   const media = data?.Page.media ?? [];
-  if (media.length === 0 && searchVal && page === 1) {
-    const liveKitsu = await searchKitsu(searchVal, perPage);
-    return {
-      media: liveKitsu,
-      hasNextPage: false,
-      currentPage: 1,
-    };
+  if (media.length === 0 && page === 1) {
+    if (searchVal) {
+      const liveKitsu = await searchKitsu(searchVal, perPage);
+      return {
+        media: liveKitsu,
+        hasNextPage: false,
+        currentPage: 1,
+      };
+    } else if (filters?.genres && filters.genres.length > 0) {
+      const liveKitsu = await getKitsuByGenre(filters.genres[0], perPage);
+      return {
+        media: liveKitsu,
+        hasNextPage: false,
+        currentPage: 1,
+      };
+    }
   }
   return {
     media,

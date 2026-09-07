@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Anime } from "@/lib/types";
 import { displayTitle, formatLabel } from "@/lib/types";
+import { ALL_GENRES } from "@/lib/genres";
 
 export function Navbar() {
   const router = useRouter();
@@ -13,8 +14,10 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [genresOpen, setGenresOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const genresRef = useRef<HTMLDivElement>(null);
 
   // Netflix-style header: transparent over the hero, solid once scrolled
   useEffect(() => {
@@ -53,11 +56,14 @@ export function Navbar() {
     };
   }, [query]);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
         setOpen(false);
+      }
+      if (genresRef.current && !genresRef.current.contains(e.target as Node)) {
+        setGenresOpen(false);
       }
     }
     document.addEventListener("mousedown", onClick);
@@ -160,28 +166,129 @@ export function Navbar() {
         </button>
 
         <nav className="hidden shrink-0 items-center gap-5 text-sm font-medium text-muted sm:flex">
-          <Link href="/" className="hover:text-foreground">
+          <Link href="/" className="hover:text-foreground transition-colors">
             Home
           </Link>
-          <Link href="/series" className="hover:text-foreground">
+          <Link href="/series" className="hover:text-foreground transition-colors">
             Series
           </Link>
-          <Link href="/movies" className="hover:text-foreground">
+          <Link href="/movies" className="hover:text-foreground transition-colors">
             Movies
           </Link>
-          <Link href="/new" className="hover:text-foreground">
+          <Link href="/new" className="hover:text-foreground transition-colors">
             New
           </Link>
-          <Link href="/search?q=trending" className="hover:text-foreground">
+          <Link href="/search?q=trending" className="hover:text-foreground transition-colors">
             Browse
           </Link>
-          <Link href="/isekai" className="hover:text-foreground">
-            Isekai
-          </Link>
-          <Link href="/donghua" className="hover:text-foreground">
-            Donghua
-          </Link>
-          <Link href="/watchlist" className="hover:text-foreground">
+
+          {/* Genres Mega-Dropdown (Grouping Isekai, Donghua, Ecchi, Harem, Fantasy, and all genres) */}
+          <div
+            ref={genresRef}
+            className="relative"
+            onMouseEnter={() => setGenresOpen(true)}
+            onMouseLeave={() => setGenresOpen(false)}
+          >
+            <Link
+              href="/genres"
+              onClick={() => setGenresOpen(false)}
+              className={`flex items-center gap-1.5 py-2 hover:text-foreground transition-colors ${
+                genresOpen ? "text-foreground font-semibold" : ""
+              }`}
+            >
+              <span>Genres</span>
+              <svg
+                className={`h-3.5 w-3.5 transition-transform duration-200 ${
+                  genresOpen ? "rotate-180 text-accent" : "text-muted"
+                }`}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </Link>
+
+            {genresOpen && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[560px] rounded-2xl border border-border bg-surface/98 backdrop-blur-xl p-5 shadow-2xl z-50 animate-fade-in">
+                <div className="mb-3 flex items-center justify-between border-b border-border/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-accent" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                      Spotlight Categories
+                    </span>
+                  </div>
+                  <Link
+                    href="/genres"
+                    onClick={() => setGenresOpen(false)}
+                    className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
+                  >
+                    All Genres Directory ({ALL_GENRES.length})
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+
+                {/* Spotlight 6 Cards */}
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {ALL_GENRES.filter((g) => g.featured).map((g) => (
+                    <Link
+                      key={g.name}
+                      href={g.href}
+                      onClick={() => setGenresOpen(false)}
+                      className="group flex flex-col justify-between rounded-xl border border-border/70 bg-surface-2/60 p-2.5 hover:border-accent/60 hover:bg-surface-3 transition-all cursor-pointer"
+                    >
+                      <div>
+                        <span className="text-xs font-bold text-foreground group-hover:text-accent transition-colors block">
+                          {g.name}
+                        </span>
+                        <span className="text-[10px] font-medium text-muted block mt-0.5">
+                          {g.tag}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Full A-Z Genre Grid */}
+                <div className="border-t border-border/80 pt-3">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted mb-2">
+                    All Genres (A to Z)
+                  </div>
+                  <div className="grid grid-cols-4 gap-x-2 gap-y-1 text-xs">
+                    {ALL_GENRES.map((g) => (
+                      <Link
+                        key={g.name}
+                        href={g.href}
+                        onClick={() => setGenresOpen(false)}
+                        className="rounded px-1.5 py-1 text-muted hover:text-accent hover:bg-surface-2 transition-colors truncate"
+                      >
+                        {g.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-4 border-t border-border/70 pt-3 flex items-center justify-between">
+                  <span className="text-[11px] text-muted">
+                    Explore Isekai, Donghua, Ecchi, Harem, Fantasy & more
+                  </span>
+                  <Link
+                    href="/genres"
+                    onClick={() => setGenresOpen(false)}
+                    className="rounded-lg bg-accent/10 px-3 py-1 text-xs font-semibold text-accent hover:bg-accent hover:text-white transition-colors"
+                  >
+                    Browse Full Directory
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Link href="/watchlist" className="hover:text-foreground transition-colors">
             Watchlist
           </Link>
         </nav>
@@ -225,13 +332,16 @@ export function Navbar() {
           <span className="text-[10px] font-medium">Movies</span>
         </Link>
         <Link
-          href="/donghua"
+          href="/genres"
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
           </svg>
-          <span className="text-[10px] font-medium">Donghua</span>
+          <span className="text-[10px] font-medium">Genres</span>
         </Link>
         <Link
           href="/watchlist"
@@ -253,8 +363,8 @@ export function Navbar() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           />
           {/* Drawer Content */}
-          <div className="relative ml-auto flex h-full w-64 flex-col bg-background p-6 shadow-2xl transition-transform duration-300">
-            <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-6">
+          <div className="relative ml-auto flex h-full w-72 flex-col bg-background p-6 shadow-2xl transition-transform duration-300">
+            <div className="flex items-center justify-between border-b border-border/60 pb-4 mb-4">
               <span className="font-bold text-accent">Menu</span>
               <button
                 onClick={() => setMenuOpen(false)}
@@ -265,7 +375,7 @@ export function Navbar() {
             </div>
 
             {/* Navigation Links */}
-            <nav className="flex flex-col gap-4 text-base font-semibold">
+            <nav className="flex flex-col gap-3 text-base font-semibold">
               <Link
                 href="/"
                 onClick={() => setMenuOpen(false)}
@@ -302,18 +412,11 @@ export function Navbar() {
                 Browse
               </Link>
               <Link
-                href="/isekai"
+                href="/genres"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
-                Isekai
-              </Link>
-              <Link
-                href="/donghua"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
-              >
-                Donghua
+                Genres Directory
               </Link>
               <Link
                 href="/watchlist"
@@ -325,19 +428,28 @@ export function Navbar() {
             </nav>
 
             {/* Genres Section */}
-            <div className="mt-8 border-t border-border/60 pt-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-muted block mb-4">
-                Genres
-              </span>
-              <div className="flex flex-col gap-3 text-sm font-medium">
-                {["Action", "Comedy", "Fantasy", "Isekai", "Romance", "Sci-Fi"].map((g) => (
+            <div className="mt-6 border-t border-border/60 pt-4 flex-1 overflow-hidden flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-3 shrink-0">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted">
+                  All Genres
+                </span>
+                <Link
+                  href="/genres"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-xs font-semibold text-accent hover:underline"
+                >
+                  View All ({ALL_GENRES.length}) →
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs font-medium overflow-y-auto pr-1">
+                {ALL_GENRES.map((g) => (
                   <Link
-                    key={g}
-                    href={g === "Isekai" ? "/" : `/search?genre=${g}`}
+                    key={g.name}
+                    href={g.href}
                     onClick={() => setMenuOpen(false)}
-                    className="text-muted hover:text-foreground"
+                    className="rounded-lg bg-surface-2/60 px-2.5 py-1.5 text-muted hover:text-foreground hover:bg-surface-3 transition-colors truncate"
                   >
-                    {g}
+                    {g.name}
                   </Link>
                 ))}
               </div>

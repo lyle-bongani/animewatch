@@ -212,3 +212,23 @@ export async function getKitsuAnime(id: number | string): Promise<Anime | null> 
     return null;
   }
 }
+
+export async function getKitsuByGenre(genre: string, limit = 24): Promise<Anime[]> {
+  try {
+    const formatted = genre.toLowerCase().replace(/\s+/g, "-");
+    const res = await fetch(
+      `https://kitsu.io/api/edge/anime?filter[categories]=${encodeURIComponent(formatted)}&sort=-userCount&page[limit]=${limit}`,
+      {
+        next: { revalidate: 3600 },
+        signal: AbortSignal.timeout(8000),
+      }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const items: KitsuAnimeItem[] = data?.data ?? [];
+    return items.map((i) => kitsuToAnimeModel(i, undefined, [genre]));
+  } catch (err) {
+    console.error(`Kitsu genre fetch error (${genre}):`, err);
+    return [];
+  }
+}

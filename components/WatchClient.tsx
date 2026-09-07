@@ -246,7 +246,9 @@ export function WatchClient({
         / <span className="text-foreground">{anime.format === "MOVIE" ? "Full Movie" : `Episode ${episode}`}</span>
       </nav>
       <div className="mb-6 flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3.5 text-xs sm:text-sm text-foreground/90 shadow-sm animate-fade-in">
-        <span className="text-lg shrink-0">🛡️</span>
+        <svg className="h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
         <div className="leading-snug">
           <span className="font-semibold text-accent">Ad-Free Streaming:</span> Since streams are served by third parties, we highly recommend using <a href="https://brave.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-accent-hover transition-colors">Brave Browser</a> or the <a href="https://ublockorigin.com/" target="_blank" rel="noopener noreferrer" className="underline font-semibold hover:text-accent-hover transition-colors">uBlock Origin</a> extension to automatically block all player popups and redirects.
         </div>
@@ -411,7 +413,7 @@ export function WatchClient({
                     : "border-border bg-surface hover:bg-surface-2 text-foreground"
                 }`}
               >
-                {lightOff ? "💡 Lights On" : "🕶️ Lights Off"}
+                {lightOff ? "Lights On" : "Lights Off"}
               </button>
               {totalEpisodes > 1 && (
                 <>
@@ -512,7 +514,13 @@ export function WatchClient({
                 <div className="flex flex-col gap-2.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
-                      <span>🎬</span> Dailymotion Streams {dailymotionVideos.length > 0 ? `(${dailymotionVideos.length})` : ""}:
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                        <line x1="7" y1="2" x2="7" y2="22"/>
+                        <line x1="17" y1="2" x2="17" y2="22"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                      </svg>
+                      Dailymotion Streams {dailymotionVideos.length > 0 ? `(${dailymotionVideos.length})` : ""}:
                     </span>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-muted hidden sm:inline">
