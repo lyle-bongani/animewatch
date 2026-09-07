@@ -114,7 +114,7 @@ async function listBySort(
   const data = await gql<PageResult>(
     `query ($perPage: Int, $sort: [MediaSort]) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, sort: $sort, isAdult: false${extra}) {
+        media(type: ANIME, sort: $sort${extra}) {
           ${CARD_FIELDS}
         }
       }
@@ -147,7 +147,7 @@ export function getPopular(perPage = 24): Promise<Anime[]> {
 }
 
 export function getTopRated(perPage = 24): Promise<Anime[]> {
-  return listBySort(["SCORE_DESC"], perPage, ", averageScore_greater: 60");
+  return listBySort(["SCORE_DESC"], perPage);
 }
 
 /** Currently airing shows, freshest first. Short revalidate so it stays current. */
@@ -159,7 +159,7 @@ export function getByGenre(genre: string, perPage = 24): Promise<Anime[]> {
   return gql<PageResult>(
     `query ($perPage: Int, $genre: String) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, genre: $genre, sort: POPULARITY_DESC, isAdult: false) {
+        media(type: ANIME, genre: $genre, sort: POPULARITY_DESC) {
           ${CARD_FIELDS}
         }
       }
@@ -182,7 +182,7 @@ export function getIsekaiBySort(sort: string[], perPage = 24): Promise<Anime[]> 
   return gql<PageResult>(
     `query ($perPage: Int, $sort: [MediaSort]) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, tag: "Isekai", sort: $sort, isAdult: false) {
+        media(type: ANIME, tag: "Isekai", sort: $sort) {
           ${CARD_FIELDS}
         }
       }
@@ -201,7 +201,7 @@ export function getOngoingIsekai(perPage = 24): Promise<Anime[]> {
   return gql<PageResult>(
     `query ($perPage: Int) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, tag: "Isekai", status: RELEASING, sort: POPULARITY_DESC, isAdult: false) {
+        media(type: ANIME, tag: "Isekai", status: RELEASING, sort: POPULARITY_DESC) {
           ${CARD_FIELDS}
         }
       }
@@ -220,7 +220,7 @@ export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> 
   return gql<PageResult>(
     `query ($perPage: Int, $sort: [MediaSort]) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, format: MOVIE, sort: $sort, isAdult: false) {
+        media(type: ANIME, format: MOVIE, sort: $sort) {
           ${CARD_FIELDS}
         }
       }
@@ -241,7 +241,7 @@ export function getSeriesBySort(sort: string[], perPage = 24, status?: string): 
   return gql<PageResult>(
     `query ($perPage: Int, $sort: [MediaSort]) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, format: TV, sort: $sort, isAdult: false${extra}) {
+        media(type: ANIME, format: TV, sort: $sort${extra}) {
           ${CARD_FIELDS}
         }
       }
@@ -260,7 +260,7 @@ export function getNewReleases(perPage = 24): Promise<Anime[]> {
   return gql<PageResult>(
     `query ($perPage: Int) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, sort: [START_DATE_DESC, POPULARITY_DESC], isAdult: false) {
+        media(type: ANIME, sort: [START_DATE_DESC, POPULARITY_DESC]) {
           ${CARD_FIELDS}
         }
       }
@@ -311,7 +311,7 @@ export async function searchAnime(
     `query ($search: String, $page: Int, $perPage: Int, $genres: [String], $format: MediaFormat, $status: MediaStatus, $season: MediaSeason, $seasonYear: Int, $sort: [MediaSort], $country: CountryCode) {
       Page(page: $page, perPage: $perPage) {
         pageInfo { hasNextPage currentPage }
-        media(type: ANIME, search: $search, countryOfOrigin: $country, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, sort: $sort, isAdult: false) {
+        media(type: ANIME, search: $search, countryOfOrigin: $country, genre_in: $genres, format: $format, status: $status, season: $season, seasonYear: $seasonYear, sort: $sort) {
           ${CARD_FIELDS}
         }
       }
@@ -443,7 +443,7 @@ export async function getDonghuaBySort(
   const data = await gql<PageResult>(
     `query ($perPage: Int, $sort: [MediaSort], $status: MediaStatus) {
       Page(page: 1, perPage: $perPage) {
-        media(type: ANIME, countryOfOrigin: "CN", sort: $sort, status: $status, isAdult: false) {
+        media(type: ANIME, countryOfOrigin: "CN", sort: $sort, status: $status) {
           ${CARD_FIELDS}
         }
       }

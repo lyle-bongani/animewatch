@@ -20,6 +20,8 @@ export interface KitsuAnimeItem {
     startDate?: string;
     subtype?: string;
     status?: string;
+    ageRating?: string;
+    ageRatingGuide?: string;
     posterImage?: {
       tiny?: string;
       small?: string;
@@ -77,6 +79,7 @@ export function kitsuToAnimeModel(item: KitsuAnimeItem, malId?: number | string,
     format: isMovie ? "MOVIE" : (attrs.subtype?.toUpperCase() || "TV"),
     status: attrs.status === "current" ? "RELEASING" : "FINISHED",
     seasonYear: year,
+    isAdult: attrs.ageRating === "R18",
     trailer: attrs.youtubeVideoId ? { id: attrs.youtubeVideoId, site: "youtube" } : null,
   };
 }
