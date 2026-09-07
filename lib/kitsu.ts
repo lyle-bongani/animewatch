@@ -81,9 +81,10 @@ export function kitsuToAnimeModel(item: KitsuAnimeItem, malId?: number | string,
   };
 }
 
-export async function getKitsuTrending(limit = 24): Promise<Anime[]> {
+export async function getKitsuTrending(limit = 20): Promise<Anime[]> {
   try {
-    const res = await fetch(`https://kitsu.io/api/edge/trending/anime?limit=${limit}`, {
+    const safeLimit = Math.min(Math.max(1, limit), 20);
+    const res = await fetch(`https://kitsu.io/api/edge/trending/anime?limit=${safeLimit}`, {
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(8000),
     });
@@ -97,9 +98,10 @@ export async function getKitsuTrending(limit = 24): Promise<Anime[]> {
   }
 }
 
-export async function getKitsuPopular(limit = 24): Promise<Anime[]> {
+export async function getKitsuPopular(limit = 20): Promise<Anime[]> {
   try {
-    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-userCount&page[limit]=${limit}`, {
+    const safeLimit = Math.min(Math.max(1, limit), 20);
+    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-userCount&page[limit]=${safeLimit}`, {
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(8000),
     });
@@ -113,9 +115,10 @@ export async function getKitsuPopular(limit = 24): Promise<Anime[]> {
   }
 }
 
-export async function getKitsuTopRated(limit = 24): Promise<Anime[]> {
+export async function getKitsuTopRated(limit = 20): Promise<Anime[]> {
   try {
-    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-averageRating&page[limit]=${limit}`, {
+    const safeLimit = Math.min(Math.max(1, limit), 20);
+    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-averageRating&page[limit]=${safeLimit}`, {
       next: { revalidate: 3600 },
       signal: AbortSignal.timeout(8000),
     });
@@ -129,10 +132,11 @@ export async function getKitsuTopRated(limit = 24): Promise<Anime[]> {
   }
 }
 
-export async function getKitsuAiring(limit = 24): Promise<Anime[]> {
+export async function getKitsuAiring(limit = 20): Promise<Anime[]> {
   try {
+    const safeLimit = Math.min(Math.max(1, limit), 20);
     const res = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[status]=current&sort=-userCount&page[limit]=${limit}`,
+      `https://kitsu.io/api/edge/anime?filter[status]=current&sort=-userCount&page[limit]=${safeLimit}`,
       {
         next: { revalidate: 1800 },
         signal: AbortSignal.timeout(8000),
@@ -148,9 +152,10 @@ export async function getKitsuAiring(limit = 24): Promise<Anime[]> {
   }
 }
 
-export async function getKitsuNewReleases(limit = 24): Promise<Anime[]> {
+export async function getKitsuNewReleases(limit = 20): Promise<Anime[]> {
   try {
-    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-startDate&page[limit]=${limit}`, {
+    const safeLimit = Math.min(Math.max(1, limit), 20);
+    const res = await fetch(`https://kitsu.io/api/edge/anime?sort=-startDate&page[limit]=${safeLimit}`, {
       next: { revalidate: 1800 },
       signal: AbortSignal.timeout(8000),
     });
@@ -168,8 +173,9 @@ export async function searchKitsu(query: string, limit = 12): Promise<Anime[]> {
   try {
     const q = query.trim();
     if (!q) return [];
+    const safeLimit = Math.min(Math.max(1, limit), 20);
     const res = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(q)}&page[limit]=${limit}`,
+      `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(q)}&page[limit]=${safeLimit}`,
       {
         next: { revalidate: 1800 },
         signal: AbortSignal.timeout(8000),
@@ -187,37 +193,76 @@ export async function searchKitsu(query: string, limit = 12): Promise<Anime[]> {
 
 export async function getKitsuAnime(id: number | string): Promise<Anime | null> {
   try {
+    // 1. Direct Kitsu ID lookup
     const res = await fetch(`https://kitsu.io/api/edge/anime/${id}?include=categories,mappings`, {
       next: { revalidate: 86400 },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data?.data) return null;
+    if (res.ok) {
+      const data = await res.json();
+      if (data?.data) {
+        const categories = data.included
+          ?.filter((x: { type: string; attributes?: { title?: string } }) => x.type === "categories")
+          .map((c: { attributes?: { title?: string } }) => c.attributes?.title)
+          .filter(Boolean) as string[];
 
-    const categories = data.included
-      ?.filter((x: { type: string; attributes?: { title?: string } }) => x.type === "categories")
-      .map((c: { attributes?: { title?: string } }) => c.attributes?.title)
-      .filter(Boolean) as string[];
+        const malMapping = data.included?.find(
+          (x: { type: string; attributes?: { externalSite?: string; externalId?: string } }) =>
+            x.type === "mappings" && x.attributes?.externalSite === "myanimelist/anime"
+        );
+        const malId = malMapping?.attributes?.externalId ? parseInt(malMapping.attributes.externalId, 10) : undefined;
 
-    const malMapping = data.included?.find(
-      (x: { type: string; attributes?: { externalSite?: string; externalId?: string } }) =>
-        x.type === "mappings" && x.attributes?.externalSite === "myanimelist/anime"
-    );
-    const malId = malMapping?.attributes?.externalId ? parseInt(malMapping.attributes.externalId, 10) : undefined;
+        return kitsuToAnimeModel(data.data, malId, categories);
+      }
+    }
 
-    return kitsuToAnimeModel(data.data, malId, categories);
+    // 2. Mapping fallback for AniList ID
+    try {
+      const anilistMapRes = await fetch(
+        `https://kitsu.io/api/edge/mappings?filter[externalSite]=anilist/anime&filter[externalId]=${id}&include=item`,
+        { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8000) }
+      );
+      if (anilistMapRes.ok) {
+        const mapData = await anilistMapRes.json();
+        const item = mapData.included?.find((x: { type: string }) => x.type === "anime");
+        if (item) {
+          return kitsuToAnimeModel(item, id);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    // 3. Mapping fallback for MyAnimeList ID
+    try {
+      const malMapRes = await fetch(
+        `https://kitsu.io/api/edge/mappings?filter[externalSite]=myanimelist/anime&filter[externalId]=${id}&include=item`,
+        { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8000) }
+      );
+      if (malMapRes.ok) {
+        const malData = await malMapRes.json();
+        const item = malData.included?.find((x: { type: string }) => x.type === "anime");
+        if (item) {
+          return kitsuToAnimeModel(item, id);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+
+    return null;
   } catch (err) {
     console.error("Kitsu detail fetch error:", err);
     return null;
   }
 }
 
-export async function getKitsuByGenre(genre: string, limit = 24): Promise<Anime[]> {
+export async function getKitsuByGenre(genre: string, limit = 20, offset = 0): Promise<Anime[]> {
   try {
     const formatted = genre.toLowerCase().replace(/\s+/g, "-");
+    const safeLimit = Math.min(Math.max(1, limit), 20);
     const res = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[categories]=${encodeURIComponent(formatted)}&sort=-userCount&page[limit]=${limit}`,
+      `https://kitsu.io/api/edge/anime?filter[categories]=${encodeURIComponent(formatted)}&sort=-userCount&page[limit]=${safeLimit}&page[offset]=${offset}`,
       {
         next: { revalidate: 3600 },
         signal: AbortSignal.timeout(8000),

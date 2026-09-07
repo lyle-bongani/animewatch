@@ -331,8 +331,9 @@ export async function searchAnime(
     300,
   );
   const media = data?.Page.media ?? [];
-  if (media.length === 0 && page === 1) {
-    if (searchVal) {
+  if (media.length === 0) {
+    const offset = (page - 1) * Math.min(perPage, 20);
+    if (searchVal && page === 1) {
       const liveKitsu = await searchKitsu(searchVal, perPage);
       return {
         media: liveKitsu,
@@ -340,11 +341,11 @@ export async function searchAnime(
         currentPage: 1,
       };
     } else if (filters?.genres && filters.genres.length > 0) {
-      const liveKitsu = await getKitsuByGenre(filters.genres[0], perPage);
+      const liveKitsu = await getKitsuByGenre(filters.genres[0], perPage, offset);
       return {
         media: liveKitsu,
-        hasNextPage: false,
-        currentPage: 1,
+        hasNextPage: liveKitsu.length >= 20,
+        currentPage: page,
       };
     }
   }

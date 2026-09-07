@@ -84,7 +84,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       searchAnime(query, pageNum, 24, filters).catch(() => ({ media: [], hasNextPage: false })),
       query && pageNum === 1 ? searchCinemeta(query, 12).catch(() => []) : Promise.resolve([]),
     ]);
-    heading = query ? `Results for "${query}"` : "Filtered Results";
+    heading = query ? `Results for "${query}"` : genre ? `${genre} Anime` : "Filtered Results";
     const combined = [...cinemeta, ...res.media];
     const seen = new Set<string>();
     items = combined.filter((m) => {
@@ -118,7 +118,7 @@ export default async function SearchPage({ searchParams }: { searchParams: SP })
       <div className="mb-4 flex items-center gap-2 text-sm text-muted">
         <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
         <span>/</span>
-        <span className="text-foreground">{browse ? browse.title : query ? `"${query}"` : "Search"}</span>
+        <span className="text-foreground">{browse ? browse.title : query ? `"${query}"` : genre ? genre : "Search"}</span>
       </div>
 
       <h1 className="mb-5 text-2xl font-bold sm:text-3xl">{heading}</h1>

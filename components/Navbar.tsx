@@ -96,7 +96,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <div ref={boxRef} className="relative min-w-0 flex-1 max-w-xl">
+        <div ref={boxRef} className="relative min-w-0 flex-1 max-w-[280px] sm:max-w-xs md:max-w-sm">
           <form onSubmit={submit}>
             <input
               type="search"
@@ -117,7 +117,7 @@ export function Navbar() {
           </form>
 
           {open && (results.length > 0 || loading) && (
-            <div className="absolute mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-2xl">
+            <div className="absolute mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-2xl z-50">
               {loading && results.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-muted">Searching…</div>
               ) : (
@@ -211,7 +211,7 @@ export function Navbar() {
             </Link>
 
             {genresOpen && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[560px] rounded-2xl border border-border bg-surface/98 backdrop-blur-xl p-5 shadow-2xl z-50 animate-fade-in">
+              <div className="absolute right-0 top-full mt-1.5 w-[380px] sm:w-[420px] max-w-[calc(100vw-2rem)] rounded-2xl border border-border bg-surface/98 backdrop-blur-xl p-4 sm:p-5 shadow-2xl z-50 animate-fade-in">
                 <div className="mb-3 flex items-center justify-between border-b border-border/80 pb-2.5">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-accent" />
@@ -224,7 +224,7 @@ export function Navbar() {
                     onClick={() => setGenresOpen(false)}
                     className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
                   >
-                    All Genres Directory ({ALL_GENRES.length})
+                    All Directory ({ALL_GENRES.length})
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
@@ -232,19 +232,19 @@ export function Navbar() {
                 </div>
 
                 {/* Spotlight 6 Cards */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-3 gap-2 mb-3">
                   {ALL_GENRES.filter((g) => g.featured).map((g) => (
                     <Link
                       key={g.name}
                       href={g.href}
                       onClick={() => setGenresOpen(false)}
-                      className="group flex flex-col justify-between rounded-xl border border-border/70 bg-surface-2/60 p-2.5 hover:border-accent/60 hover:bg-surface-3 transition-all cursor-pointer"
+                      className="group flex flex-col justify-between rounded-xl border border-border/70 bg-surface-2/60 p-2 hover:border-accent/60 hover:bg-surface-3 transition-all cursor-pointer"
                     >
                       <div>
-                        <span className="text-xs font-bold text-foreground group-hover:text-accent transition-colors block">
+                        <span className="text-xs font-bold text-foreground group-hover:text-accent transition-colors block truncate">
                           {g.name}
                         </span>
-                        <span className="text-[10px] font-medium text-muted block mt-0.5">
+                        <span className="text-[9.5px] font-medium text-muted block mt-0.5 truncate">
                           {g.tag}
                         </span>
                       </div>
@@ -253,17 +253,17 @@ export function Navbar() {
                 </div>
 
                 {/* Full A-Z Genre Grid */}
-                <div className="border-t border-border/80 pt-3">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted mb-2">
+                <div className="border-t border-border/80 pt-2.5">
+                  <div className="text-[10.5px] font-bold uppercase tracking-wider text-muted mb-1.5">
                     All Genres (A to Z)
                   </div>
-                  <div className="grid grid-cols-4 gap-x-2 gap-y-1 text-xs">
+                  <div className="grid grid-cols-3 gap-x-2 gap-y-1 text-xs max-h-44 overflow-y-auto pr-1">
                     {ALL_GENRES.map((g) => (
                       <Link
                         key={g.name}
                         href={g.href}
                         onClick={() => setGenresOpen(false)}
-                        className="rounded px-1.5 py-1 text-muted hover:text-accent hover:bg-surface-2 transition-colors truncate"
+                        className="rounded px-1.5 py-0.5 text-muted hover:text-accent hover:bg-surface-2 transition-colors truncate"
                       >
                         {g.name}
                       </Link>
@@ -272,16 +272,16 @@ export function Navbar() {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-4 border-t border-border/70 pt-3 flex items-center justify-between">
-                  <span className="text-[11px] text-muted">
-                    Explore Isekai, Donghua, Ecchi, Harem, Fantasy & more
+                <div className="mt-3 border-t border-border/70 pt-2.5 flex items-center justify-between">
+                  <span className="text-[10.5px] text-muted truncate">
+                    35 Categories Available
                   </span>
                   <Link
                     href="/genres"
                     onClick={() => setGenresOpen(false)}
-                    className="rounded-lg bg-accent/10 px-3 py-1 text-xs font-semibold text-accent hover:bg-accent hover:text-white transition-colors"
+                    className="rounded-lg bg-accent/10 px-3 py-1 text-xs font-semibold text-accent hover:bg-accent hover:text-white transition-colors shrink-0"
                   >
-                    Browse Full Directory
+                    Browse Directory →
                   </Link>
                 </div>
               </div>
