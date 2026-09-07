@@ -229,7 +229,7 @@ export function WatchClient({
         <Link href={`/anime/${anime.id}`} className="hover:text-foreground">
           {displayTitle(anime)}
         </Link>{" "}
-        / <span className="text-foreground">Episode {episode}</span>
+        / <span className="text-foreground">{anime.format === "MOVIE" ? "Full Movie" : `Episode ${episode}`}</span>
       </nav>
       <div className="mb-6 flex items-center gap-3 rounded-xl border border-accent/20 bg-accent/5 px-4 py-3.5 text-xs sm:text-sm text-foreground/90 shadow-sm animate-fade-in">
         <span className="text-lg shrink-0">🛡️</span>
@@ -384,7 +384,9 @@ export function WatchClient({
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <h1 className="text-lg font-bold">
               {displayTitle(anime)}{" "}
-              <span className="text-muted">· Episode {episode}</span>
+              <span className="text-muted">
+                · {anime.format === "MOVIE" ? "Full Movie" : `Episode ${episode}`}
+              </span>
             </h1>
             <div className="flex gap-2">
               <button
@@ -397,20 +399,24 @@ export function WatchClient({
               >
                 {lightOff ? "💡 Lights On" : "🕶️ Lights Off"}
               </button>
-              <button
-                onClick={() => changeEpisode(Math.max(1, episode - 1))}
-                disabled={episode <= 1}
-                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-40"
-              >
-                ← Prev
-              </button>
-              <button
-                onClick={() => changeEpisode(Math.min(totalEpisodes, episode + 1))}
-                disabled={episode >= totalEpisodes}
-                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-40"
-              >
-                Next →
-              </button>
+              {totalEpisodes > 1 && (
+                <>
+                  <button
+                    onClick={() => changeEpisode(Math.max(1, episode - 1))}
+                    disabled={episode <= 1}
+                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-40"
+                  >
+                    ← Prev
+                  </button>
+                  <button
+                    onClick={() => changeEpisode(Math.min(totalEpisodes, episode + 1))}
+                    disabled={episode >= totalEpisodes}
+                    className="rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium hover:bg-surface-2 disabled:opacity-40"
+                  >
+                    Next →
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -720,7 +726,8 @@ export function WatchClient({
         <aside className="rounded-xl border border-border bg-surface">
           <div className="border-b border-border p-3">
             <h2 className="mb-2 text-sm font-semibold">
-              Episodes <span className="text-muted">({totalEpisodes})</span>
+              {anime.format === "MOVIE" ? "Feature Film" : "Episodes"}{" "}
+              <span className="text-muted">({totalEpisodes})</span>
             </h2>
             {totalEpisodes > 24 && (
               <input
