@@ -40,6 +40,9 @@ export function Footer() {
               <Link href="/donghua" className="hover:text-foreground transition-colors">
                 Donghua
               </Link>
+              <Link href="/manga" className="hover:text-foreground transition-colors">
+                Manga / Manhwa
+              </Link>
               <Link href="/genres" className="hover:text-foreground transition-colors">
                 Genres
               </Link>

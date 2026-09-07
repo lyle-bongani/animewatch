@@ -178,6 +178,9 @@ export function Navbar() {
           <Link href="/new" className="hover:text-foreground transition-colors">
             New
           </Link>
+          <Link href="/manga" className="hover:text-foreground transition-colors">
+            Manga
+          </Link>
           <Link href="/search?q=trending" className="hover:text-foreground transition-colors">
             Browse
           </Link>
@@ -403,6 +406,13 @@ export function Navbar() {
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
                 New & Popular
+              </Link>
+              <Link
+                href="/manga"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                Manga / Manhwa
               </Link>
               <Link
                 href="/search?q=trending"
