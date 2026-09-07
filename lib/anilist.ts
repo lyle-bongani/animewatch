@@ -1,5 +1,13 @@
 import { is3D, type Anime } from "./types";
-import { FALLBACK_MOVIES, FALLBACK_SERIES, FALLBACK_NEW } from "./fallback-data";
+import {
+  getKitsuTrending,
+  getKitsuPopular,
+  getKitsuTopRated,
+  getKitsuAiring,
+  getKitsuNewReleases,
+  getKitsuAnime,
+  searchKitsu,
+} from "./kitsu";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -115,8 +123,16 @@ async function listBySort(
   );
   const list = data?.Page.media;
   if (!list || list.length === 0) {
-    if (extra.includes("RELEASING")) return FALLBACK_NEW.slice(0, perPage);
-    return FALLBACK_SERIES.slice(0, perPage);
+    if (extra.includes("RELEASING") || (sort && sort[0] === "START_DATE_DESC")) {
+      return getKitsuAiring(perPage);
+    }
+    if (sort && sort[0] === "SCORE_DESC") {
+      return getKitsuTopRated(perPage);
+    }
+    if (sort && sort[0] === "POPULARITY_DESC") {
+      return getKitsuPopular(perPage);
+    }
+    return getKitsuTrending(perPage);
   }
   return list;
 }
@@ -191,9 +207,12 @@ export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> 
       }
     }`,
     { perPage, sort },
-  ).then((d) => {
+  ).then(async (d) => {
     const list = d?.Page.media;
-    if (!list || list.length === 0) return FALLBACK_MOVIES.slice(0, perPage);
+    if (!list || list.length === 0) {
+      const live = await searchKitsu("movie", perPage);
+      return live.slice(0, perPage);
+    }
     return list;
   });
 }
@@ -211,7 +230,9 @@ export function getSeriesBySort(sort: string[], perPage = 24, status?: string): 
     { perPage, sort },
   ).then((d) => {
     const list = d?.Page.media;
-    if (!list || list.length === 0) return FALLBACK_SERIES.slice(0, perPage);
+    if (!list || list.length === 0) {
+      return status === "RELEASING" ? getKitsuAiring(perPage) : getKitsuPopular(perPage);
+    }
     return list;
   });
 }
@@ -228,7 +249,7 @@ export function getNewReleases(perPage = 24): Promise<Anime[]> {
     { perPage },
   ).then((d) => {
     const list = d?.Page.media;
-    if (!list || list.length === 0) return FALLBACK_NEW.slice(0, perPage);
+    if (!list || list.length === 0) return getKitsuNewReleases(perPage);
     return list;
   });
 }
@@ -290,8 +311,17 @@ export async function searchAnime(
     },
     300,
   );
+  const media = data?.Page.media ?? [];
+  if (media.length === 0 && searchVal && page === 1) {
+    const liveKitsu = await searchKitsu(searchVal, perPage);
+    return {
+      media: liveKitsu,
+      hasNextPage: false,
+      currentPage: 1,
+    };
+  }
   return {
-    media: data?.Page.media ?? [],
+    media,
     hasNextPage: data?.Page.pageInfo.hasNextPage ?? false,
     currentPage: data?.Page.pageInfo.currentPage ?? page,
   };
@@ -372,8 +402,8 @@ export async function getAnime(id: number): Promise<Anime | null> {
     }`,
     { id },
   );
-  const fallback = [...FALLBACK_MOVIES, ...FALLBACK_SERIES, ...FALLBACK_NEW].find((a) => a.id === id);
-  return data?.Media ?? fallback ?? null;
+  if (data?.Media) return data.Media;
+  return getKitsuAnime(id);
 }
 
 export async function getDonghuaBySort(
