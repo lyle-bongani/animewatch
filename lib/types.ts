@@ -131,6 +131,16 @@ export function maturityLabel(a: Pick<Anime, "isAdult" | "genres">): string {
   return "13+";
 }
 
+/**
+ * Detects if a title is strictly 18+ adult content (Erotica / Hentai / isAdult),
+ * distinct from mainstream clean anime with fanservice (like Seven Deadly Sins).
+ */
+export function isStraight18(a: Pick<Anime, "isAdult" | "genres">): boolean {
+  if (a.isAdult) return true;
+  const g = (a.genres ?? []).map((x) => x.toLowerCase());
+  return g.includes("erotica") || g.includes("hentai");
+}
+
 /** Director name from the AniList staff edges, if present. */
 export function directorName(a: Pick<Anime, "staff">): string | null {
   const edge = a.staff?.edges.find((e) => (e.role ?? "").toLowerCase().includes("director"));

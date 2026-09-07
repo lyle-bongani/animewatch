@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { AdultGateProvider } from "@/components/AdultGateContext";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -43,10 +44,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Navbar />
-        <main className="flex-1 pb-20 sm:pb-0">{children}</main>
-        {modal}
-        <Footer />
+        <AdultGateProvider>
+          <Navbar />
+          <main className="flex-1 pb-20 sm:pb-0">{children}</main>
+          {modal}
+          <Footer />
+        </AdultGateProvider>
       </body>
     </html>
   );

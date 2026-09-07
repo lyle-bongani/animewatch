@@ -12,7 +12,7 @@ export const ALL_GENRES: GenreMeta[] = [
   { name: "Isekai", slug: "Isekai", tag: "Other World", description: "Transported or reincarnated into an alternate fantasy realm.", featured: true, href: "/isekai" },
   { name: "Donghua", slug: "Donghua", tag: "Chinese Anime", description: "Chinese 3D and 2D animation, cultivation sagas, and martial arts.", featured: true, href: "/donghua" },
   { name: "Ecchi", slug: "Ecchi", tag: "Fanservice", description: "Cheeky humor, risqué situations, and playful fanservice.", featured: true, href: "/search?genre=Ecchi" },
-  { name: "Erotica", slug: "Erotica", tag: "Erotic", description: "Sensual narratives, steamy relationships, and adult romance.", featured: true, href: "/search?genre=Erotica" },
+  { name: "Erotica", slug: "Erotica", tag: "18+ Adult", description: "Sensual narratives, steamy relationships, and adult romance.", featured: true, href: "/search?genre=Erotica" },
   { name: "Mature", slug: "Mature", tag: "Mature", description: "Grit, graphic realism, and intense adult themes.", featured: true, href: "/search?genre=Mature" },
   { name: "Harem", slug: "Harem", tag: "Multiple Suitors", description: "A lead surrounded by multiple romantic interests.", featured: true, href: "/search?genre=Harem" },
   { name: "Reverse Harem", slug: "Reverse Harem", tag: "Female Lead", description: "A female protagonist pursued by several attractive suitors.", href: "/search?genre=Reverse+Harem" },

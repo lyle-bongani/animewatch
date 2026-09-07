@@ -7,12 +7,14 @@ import { AnimeRow } from "@/components/AnimeRow";
 import { WatchlistButton } from "@/components/WatchlistButton";
 import { DetailEpisodes } from "@/components/DetailEpisodes";
 import { DownloadButton } from "@/components/DownloadButton";
+import { AdultDetailGate } from "@/components/AdultDetailGate";
 import {
   displayTitle,
   stripHtml,
   formatLabel,
   watchableEpisodes,
   groupRelations,
+  isStraight18,
   type Anime,
 } from "@/lib/types";
 
@@ -45,6 +47,8 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
   const anime = await fetchMediaItem(id);
   if (!anime) notFound();
 
+  const isAdult = isStraight18(anime);
+
   const eps = watchableEpisodes(anime);
   const studios = anime.studios?.nodes.map((s) => s.name).filter(Boolean) ?? [];
   const recs =
@@ -63,8 +67,9 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
   ];
 
   return (
-    <div>
-      {/* Banner */}
+    <AdultDetailGate isAdultContent={isAdult}>
+      <div>
+        {/* Banner */}
       <div className="relative h-56 w-full overflow-hidden sm:h-72">
         {anime.bannerImage ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -253,7 +258,8 @@ export default async function AnimeDetailPage({ params }: { params: Params }) {
           />
         </div>
       )}
-    </div>
+      </div>
+    </AdultDetailGate>
   );
 }
 
