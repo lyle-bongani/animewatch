@@ -1,4 +1,5 @@
 import { is3D, type Anime } from "./types";
+import { FALLBACK_MOVIES, FALLBACK_SERIES, FALLBACK_NEW } from "./fallback-data";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -46,6 +47,7 @@ async function gql<T>(
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         },
         body: JSON.stringify({ query, variables }),
         next: { revalidate },
@@ -111,7 +113,12 @@ async function listBySort(
     { perPage, sort },
     revalidate,
   );
-  return data?.Page.media ?? [];
+  const list = data?.Page.media;
+  if (!list || list.length === 0) {
+    if (extra.includes("RELEASING")) return FALLBACK_NEW.slice(0, perPage);
+    return FALLBACK_SERIES.slice(0, perPage);
+  }
+  return list;
 }
 
 export function getTrending(perPage = 24): Promise<Anime[]> {
@@ -184,7 +191,11 @@ export function getMoviesBySort(sort: string[], perPage = 24): Promise<Anime[]> 
       }
     }`,
     { perPage, sort },
-  ).then((d) => d?.Page.media ?? []);
+  ).then((d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) return FALLBACK_MOVIES.slice(0, perPage);
+    return list;
+  });
 }
 
 export function getSeriesBySort(sort: string[], perPage = 24, status?: string): Promise<Anime[]> {
@@ -198,7 +209,11 @@ export function getSeriesBySort(sort: string[], perPage = 24, status?: string): 
       }
     }`,
     { perPage, sort },
-  ).then((d) => d?.Page.media ?? []);
+  ).then((d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) return FALLBACK_SERIES.slice(0, perPage);
+    return list;
+  });
 }
 
 export function getNewReleases(perPage = 24): Promise<Anime[]> {
@@ -211,7 +226,11 @@ export function getNewReleases(perPage = 24): Promise<Anime[]> {
       }
     }`,
     { perPage },
-  ).then((d) => d?.Page.media ?? []);
+  ).then((d) => {
+    const list = d?.Page.media;
+    if (!list || list.length === 0) return FALLBACK_NEW.slice(0, perPage);
+    return list;
+  });
 }
 
 export interface SearchResult {
@@ -353,7 +372,8 @@ export async function getAnime(id: number): Promise<Anime | null> {
     }`,
     { id },
   );
-  return data?.Media ?? null;
+  const fallback = [...FALLBACK_MOVIES, ...FALLBACK_SERIES, ...FALLBACK_NEW].find((a) => a.id === id);
+  return data?.Media ?? fallback ?? null;
 }
 
 export async function getDonghuaBySort(
