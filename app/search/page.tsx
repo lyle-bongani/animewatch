@@ -23,12 +23,17 @@ type SP = Promise<{
   sort?: string;
 }>;
 
-// Shortcut queries used by the home page "View All" links.
+// Shortcut queries used by the home page and header "View All" / navigation links.
 const BROWSE: Record<string, { title: string; load: () => Promise<Anime[]> }> = {
   trending: { title: "Trending Now", load: () => getTrending(30) },
   airing: { title: "Airing Now", load: () => getAiringNow(30) },
   top: { title: "Top Rated", load: () => getTopRated(30) },
   popular: { title: "Popular Anime", load: () => getPopular(30) },
+  movies: { title: "Anime Movies", load: () => searchAnime("", 1, 30, { format: "MOVIE", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
+  movie: { title: "Anime Movies", load: () => searchAnime("", 1, 30, { format: "MOVIE", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
+  series: { title: "TV Series", load: () => searchAnime("", 1, 30, { format: "TV", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
+  tv: { title: "TV Series", load: () => searchAnime("", 1, 30, { format: "TV", sort: ["POPULARITY_DESC"] }).then((r) => r.media) },
+  new: { title: "New Releases", load: () => searchAnime("", 1, 30, { sort: ["START_DATE_DESC"] }).then((r) => r.media) },
 };
 
 export async function generateMetadata({ searchParams }: { searchParams: SP }): Promise<Metadata> {

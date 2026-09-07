@@ -25,11 +25,17 @@ export function Footer() {
               <Link href="/" className="hover:text-foreground">
                 Home
               </Link>
+              <Link href="/search?q=series" className="hover:text-foreground">
+                TV Series
+              </Link>
+              <Link href="/search?q=movies" className="hover:text-foreground">
+                Movies
+              </Link>
+              <Link href="/search?q=new" className="hover:text-foreground">
+                New Releases
+              </Link>
               <Link href="/search?q=trending" className="hover:text-foreground">
                 Trending
-              </Link>
-              <Link href="/search?q=movie" className="hover:text-foreground">
-                Movies
               </Link>
             </div>
           </nav>

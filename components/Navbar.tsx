@@ -163,6 +163,15 @@ export function Navbar() {
           <Link href="/" className="hover:text-foreground">
             Home
           </Link>
+          <Link href="/search?q=series" className="hover:text-foreground">
+            Series
+          </Link>
+          <Link href="/search?q=movies" className="hover:text-foreground">
+            Movies
+          </Link>
+          <Link href="/search?q=new" className="hover:text-foreground">
+            New
+          </Link>
           <Link href="/search?q=trending" className="hover:text-foreground">
             Browse
           </Link>
@@ -190,23 +199,30 @@ export function Navbar() {
           <span className="text-[10px] font-medium">Home</span>
         </Link>
         <Link
-          href="/search?q=trending"
+          href="/search?q=series"
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+            <path d="M17 2l-5 5-5-5" />
           </svg>
-          <span className="text-[10px] font-medium">Browse</span>
+          <span className="text-[10px] font-medium">Series</span>
         </Link>
         <Link
-          href="/isekai"
+          href="/search?q=movies"
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-muted hover:text-accent"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+            <line x1="7" y1="2" x2="7" y2="22" />
+            <line x1="17" y1="2" x2="17" y2="22" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <line x1="2" y1="7" x2="7" y2="7" />
+            <line x1="2" y1="17" x2="7" y2="17" />
+            <line x1="17" y1="17" x2="22" y2="17" />
+            <line x1="17" y1="7" x2="22" y2="7" />
           </svg>
-          <span className="text-[10px] font-medium">Isekai</span>
+          <span className="text-[10px] font-medium">Movies</span>
         </Link>
         <Link
           href="/donghua"
@@ -256,6 +272,27 @@ export function Navbar() {
                 className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
               >
                 Home
+              </Link>
+              <Link
+                href="/search?q=series"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                Series
+              </Link>
+              <Link
+                href="/search?q=movies"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                Movies
+              </Link>
+              <Link
+                href="/search?q=new"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2.5 py-1 text-foreground hover:text-accent"
+              >
+                New & Popular
               </Link>
               <Link
                 href="/search?q=trending"
