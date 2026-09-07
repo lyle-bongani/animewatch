@@ -257,12 +257,101 @@ export async function getKitsuAnime(id: number | string): Promise<Anime | null> 
   }
 }
 
+const KITSU_GENRE_MAP: Record<string, string> = {
+  "Action": "action",
+  "Adventure": "adventure",
+  "Aliens": "alien",
+  "Anthro": "anthropomorphism",
+  "Avant Garde": "dementia",
+  "Award Winning": "award-winning",
+  "Boys Love": "shounen-ai",
+  "Cars": "motorsport",
+  "Comedy": "comedy",
+  "Cooking": "cooking",
+  "Crime": "crime",
+  "Cultivation": "martial-arts",
+  "Cyberpunk": "cyberpunk",
+  "Delinquents": "delinquents",
+  "Dementia": "dementia",
+  "Demons": "demon",
+  "Detective": "detective",
+  "Donghua": "donghua",
+  "Drama": "drama",
+  "Ecchi": "ecchi",
+  "Erotica": "erotica",
+  "Family": "family",
+  "Fantasy": "fantasy",
+  "Game": "video-game",
+  "Gender Bender": "gender-bender",
+  "Girls Love": "shoujo-ai",
+  "Gothic": "vampire",
+  "Gourmet": "cooking",
+  "Harem": "harem",
+  "Healing": "slice-of-life",
+  "Historical": "historical",
+  "Horror": "horror",
+  "Idols": "idol",
+  "Isekai": "isekai",
+  "Iyashikei": "slice-of-life",
+  "Josei": "josei",
+  "Kids": "kids",
+  "Magic": "magic",
+  "Magical Girl": "magical-girl",
+  "Martial Arts": "martial-arts",
+  "Mature": "mature",
+  "Mecha": "mecha",
+  "Medical": "medical",
+  "Military": "military",
+  "Monsters": "monster",
+  "Music": "music",
+  "Mystery": "mystery",
+  "Mythology": "mythology",
+  "Otaku": "otaku",
+  "Parody": "parody",
+  "Performing Arts": "the-arts",
+  "Police": "cops",
+  "Post-Apocalyptic": "post-apocalypse",
+  "Psychological": "psychological",
+  "Racing": "motorsport",
+  "Reincarnation": "reincarnation",
+  "Reverse Harem": "reverse-harem",
+  "Romance": "romance",
+  "Samurai": "samurai",
+  "School": "school-life",
+  "Sci-Fi": "science-fiction",
+  "Seinen": "seinen",
+  "Shoujo": "shoujo",
+  "Shounen": "shounen",
+  "Slice of Life": "slice-of-life",
+  "Space": "space",
+  "Sports": "sports",
+  "Super Power": "super-power",
+  "Superhero": "super-power",
+  "Supernatural": "supernatural",
+  "Survival": "survival",
+  "Suspense": "suspense",
+  "Swordplay": "swordplay",
+  "Time Travel": "time-travel",
+  "Thriller": "thriller",
+  "Urban Fantasy": "contemporary-fantasy",
+  "Vampire": "vampire",
+  "Video Game": "virtual-reality",
+  "Virtual Reality": "virtual-reality",
+  "War": "war",
+  "Workplace": "working-life",
+  "Wuxia": "martial-arts",
+  "Xianxia": "martial-arts",
+  "Yaoi": "yaoi",
+  "Yuri": "yuri",
+  "Zombies": "zombie",
+};
+
 export async function getKitsuByGenre(genre: string, limit = 20, offset = 0): Promise<Anime[]> {
   try {
-    const formatted = genre.toLowerCase().replace(/\s+/g, "-");
+    const mapped = KITSU_GENRE_MAP[genre] || genre.toLowerCase().replace(/\s+/g, "-");
     const safeLimit = Math.min(Math.max(1, limit), 20);
     const res = await fetch(
-      `https://kitsu.io/api/edge/anime?filter[categories]=${encodeURIComponent(formatted)}&sort=-userCount&page[limit]=${safeLimit}&page[offset]=${offset}`,
+      `https://kitsu.io/api/edge/anime?filter[categories]=${encodeURIComponent(mapped)}&sort=-userCount&page[limit]=${safeLimit}&page[offset]=${offset}`,
       {
         next: { revalidate: 3600 },
         signal: AbortSignal.timeout(8000),
@@ -270,7 +359,18 @@ export async function getKitsuByGenre(genre: string, limit = 20, offset = 0): Pr
     );
     if (!res.ok) return [];
     const data = await res.json();
-    const items: KitsuAnimeItem[] = data?.data ?? [];
+    let items: KitsuAnimeItem[] = data?.data ?? [];
+    if (items.length === 0 && offset === 0) {
+      // Fallback to text query if category returned 0
+      const textRes = await fetch(
+        `https://kitsu.io/api/edge/anime?filter[text]=${encodeURIComponent(genre)}&sort=-userCount&page[limit]=${safeLimit}`,
+        { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
+      );
+      if (textRes.ok) {
+        const textData = await textRes.json();
+        items = textData?.data ?? [];
+      }
+    }
     return items.map((i) => kitsuToAnimeModel(i, undefined, [genre]));
   } catch (err) {
     console.error(`Kitsu genre fetch error (${genre}):`, err);

@@ -274,7 +274,7 @@ export function Navbar() {
                 {/* Footer */}
                 <div className="mt-3 border-t border-border/70 pt-2.5 flex items-center justify-between">
                   <span className="text-[10.5px] text-muted truncate">
-                    35 Categories Available
+                    {ALL_GENRES.length} Categories Available
                   </span>
                   <Link
                     href="/genres"
