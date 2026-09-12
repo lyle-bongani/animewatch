@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Anime Genres & Categories - AnimeWatch",
-  description: "Explore anime, donghua, and series by genres including Isekai, Donghua, Ecchi, Harem, Fantasy, Action, Romance, and more.",
+  description: "Explore anime, donghua, and series by genres including Action, Fantasy, Drama, Slice of Life, Adventure, Comedy, Romance, and more.",
 };
 
 export default function GenresPage() {

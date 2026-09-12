@@ -185,7 +185,7 @@ export function Navbar() {
             Browse
           </Link>
 
-          {/* Genres Mega-Dropdown (Grouping Isekai, Donghua, Ecchi, Harem, Fantasy, and all genres) */}
+          {/* Genres Mega-Dropdown (Grouping Action, Fantasy, Drama, Slice of Life, and all genres) */}
           <div
             ref={genresRef}
             className="relative"

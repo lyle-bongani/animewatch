@@ -36,8 +36,6 @@ export function WatchClient({
   streamingEpisodes: StreamingEpisode[];
 }) {
   const isChinese = anime.countryOfOrigin === "CN";
-  const { isAdultUnlocked, unlockAdult } = useAdultGate();
-  const isAdultRestricted = isStraight18(anime) && !isAdultUnlocked;
 
   const [episode, setEpisode] = useState(initialEpisode);
   const [serverId, setServerId] = useState(() => {
@@ -262,28 +260,7 @@ export function WatchClient({
         {/* Player column */}
         <div className={lightOff ? "relative z-50" : ""}>
           <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
-            {isAdultRestricted ? (
-              <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-surface/95 backdrop-blur-md">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner border border-accent/20">
-                  <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-foreground sm:text-xl">
-                  18+ Stream Locked
-                </h3>
-                <p className="mt-1.5 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
-                  This title is rated 18+ and locked under Safe Mode. Please acknowledge that you are at least 18 years of age to stream.
-                </p>
-                <button
-                  type="button"
-                  onClick={unlockAdult}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-2.5 text-xs font-bold text-white shadow-lg shadow-accent/25 hover:bg-accent/90 transition-colors cursor-pointer"
-                >
-                  I Acknowledge & Unlock Stream
-                </button>
-              </div>
-            ) : serverId === "luciferdonghua" ? (
+            {serverId === "luciferdonghua" ? (
               luciferLoading ? (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center bg-surface">
                   <span className="h-10 w-10 animate-spin rounded-full border-3 border-accent border-t-transparent" />

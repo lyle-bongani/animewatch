@@ -8,17 +8,22 @@ export interface GenreMeta {
 }
 
 export const ALL_GENRES: GenreMeta[] = [
-  // Core & Spotlight Categories
+  // Core & Featured Categories
+  { name: "Action", slug: "Action", tag: "Action", description: "High-octane fights, dynamic martial arts, and epic battles.", featured: true, href: "/search?genre=Action" },
+  { name: "Fantasy", slug: "Fantasy", tag: "Fantasy", description: "Mythical lands, swords, magic spells, and legendary creatures.", featured: true, href: "/search?genre=Fantasy" },
+  { name: "Drama", slug: "Drama", tag: "Emotional", description: "Emotionally charged plots, deep relationships, and heartfelt struggles.", featured: true, href: "/search?genre=Drama" },
+  { name: "Slice of Life", slug: "Slice of Life", tag: "Daily Life", description: "Comforting day-to-day moments, relaxing friendships, and warmth.", featured: true, href: "/search?genre=Slice+of+Life" },
+  { name: "Adventure", slug: "Adventure", tag: "Exploration", description: "Epic journeys, wilderness exploration, and grand quests.", featured: true, href: "/search?genre=Adventure" },
+  { name: "Comedy", slug: "Comedy", tag: "Humor", description: "Laugh-out-loud humor, hilarious parodies, and fun antics.", featured: true, href: "/search?genre=Comedy" },
+  { name: "Romance", slug: "Romance", tag: "Love", description: "Love stories, romantic chemistry, courtship, and emotional warmth.", featured: true, href: "/search?genre=Romance" },
+  { name: "Sci-Fi", slug: "Sci-Fi", tag: "Science Fiction", description: "Futuristic technology, space travel, AI, and scientific discoveries.", featured: true, href: "/search?genre=Sci-Fi" },
   { name: "Isekai", slug: "Isekai", tag: "Other World", description: "Transported or reincarnated into an alternate fantasy realm.", featured: true, href: "/isekai" },
   { name: "Donghua", slug: "Donghua", tag: "Chinese Anime", description: "Chinese 3D and 2D animation, cultivation sagas, and martial arts.", featured: true, href: "/donghua" },
-  { name: "Ecchi", slug: "Ecchi", tag: "Fanservice", description: "Cheeky humor, risqué situations, and playful fanservice.", featured: true, href: "/search?genre=Ecchi" },
-  { name: "Erotica", slug: "Erotica", tag: "18+ Adult", description: "Sensual narratives, steamy relationships, and adult romance.", featured: true, href: "/search?genre=Erotica" },
-  { name: "Mature", slug: "Mature", tag: "Mature", description: "Grit, graphic realism, and intense adult themes.", featured: true, href: "/search?genre=Mature" },
-  { name: "Harem", slug: "Harem", tag: "Multiple Suitors", description: "A lead surrounded by multiple romantic interests.", featured: true, href: "/search?genre=Harem" },
+  { name: "Ecchi", slug: "Ecchi", tag: "Humor", description: "Cheeky humor and playful situations.", href: "/search?genre=Ecchi" },
+  { name: "Erotica", slug: "Erotica", tag: "Romance", description: "Sensual narratives and adult romance.", href: "/search?genre=Erotica" },
+  { name: "Mature", slug: "Mature", tag: "Realism", description: "Grit, graphic realism, and mature themes.", href: "/search?genre=Mature" },
+  { name: "Harem", slug: "Harem", tag: "Romance", description: "A lead surrounded by multiple romantic interests.", href: "/search?genre=Harem" },
   { name: "Reverse Harem", slug: "Reverse Harem", tag: "Female Lead", description: "A female protagonist pursued by several attractive suitors.", href: "/search?genre=Reverse+Harem" },
-  { name: "Fantasy", slug: "Fantasy", tag: "Fantasy", description: "Mythical lands, swords, magic spells, and legendary creatures.", featured: true, href: "/search?genre=Fantasy" },
-  { name: "Action", slug: "Action", tag: "Action", description: "High-octane fights, dynamic martial arts, and epic battles.", featured: true, href: "/search?genre=Action" },
-  { name: "Adventure", slug: "Adventure", tag: "Exploration", description: "Epic journeys, wilderness exploration, and grand quests.", href: "/search?genre=Adventure" },
 
   // Full A-Z Genre & Theme Directory
   { name: "Aliens", slug: "Aliens", tag: "Extraterrestrial", description: "Extraterrestrial beings, invasions, and cosmic encounters.", href: "/search?genre=Aliens" },
