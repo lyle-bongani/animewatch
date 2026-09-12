@@ -131,8 +131,10 @@ export function DonghuaBrowser() {
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-accent"
             >
               <option value="POPULARITY_DESC">Most Popular</option>
-              <option value="START_DATE_DESC">New Releases</option>
-              <option value="TRENDING_DESC">Recently Updated</option>
+              <option value="START_DATE_DESC">Newest Releases</option>
+              <option value="START_DATE">Upcoming Releases</option>
+              <option value="UPDATED_AT_DESC">Recently Updated</option>
+              <option value="TRENDING_DESC">Trending</option>
               <option value="SCORE_DESC">Top Rated</option>
             </select>
           </div>

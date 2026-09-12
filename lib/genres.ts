@@ -128,8 +128,9 @@ export const SEASONS = ["WINTER", "SPRING", "SUMMER", "FALL"];
 
 export const SORTS = [
   { value: "POPULARITY_DESC", label: "Popularity" },
-  { value: "SCORE_DESC", label: "Average Score" },
   { value: "TRENDING_DESC", label: "Trending" },
-  { value: "START_DATE_DESC", label: "Release Date" },
+  { value: "START_DATE_DESC", label: "Newest Releases" },
+  { value: "START_DATE", label: "Upcoming Releases" },
   { value: "UPDATED_AT_DESC", label: "Recently Updated" },
+  { value: "SCORE_DESC", label: "Average Score" },
 ];

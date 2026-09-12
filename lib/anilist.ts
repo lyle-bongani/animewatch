@@ -330,6 +330,10 @@ export async function searchAnime(
     sortList = filters.sort;
   } else if (searchVal) {
     sortList = ["SEARCH_MATCH"];
+  } else if (filters?.status === "NOT_YET_RELEASED") {
+    sortList = ["START_DATE", "POPULARITY_DESC"];
+  } else if (filters?.status === "RELEASING") {
+    sortList = ["UPDATED_AT_DESC", "TRENDING_DESC"];
   }
 
   const data = await gql<{
