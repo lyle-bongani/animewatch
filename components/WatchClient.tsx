@@ -259,7 +259,7 @@ export function WatchClient({
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         {/* Player column */}
         <div className={lightOff ? "relative z-50" : ""}>
-          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl">
+          <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-black shadow-2xl touch-manipulation">
             {serverId === "luciferdonghua" ? (
               luciferLoading ? (
                 <div className="flex h-full w-full flex-col items-center justify-center gap-3 p-6 text-center bg-surface">
@@ -272,8 +272,8 @@ export function WatchClient({
                   src={activeSrc}
                   title={`${displayTitle(anime)} — Episode ${episode}`}
                   allowFullScreen
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  referrerPolicy="origin"
+                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
+                  referrerPolicy="no-referrer"
                   className="h-full w-full border-0"
                 />
               ) : (
@@ -312,55 +312,15 @@ export function WatchClient({
                     src={dailymotionSrc}
                     title={`${displayTitle(anime)} — Episode ${episode} (Dailymotion)`}
                     allowFullScreen
-                    allow="autoplay; encrypted-media; picture-in-picture; fullscreen; web-share"
-                    referrerPolicy="origin"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
+                    referrerPolicy="no-referrer"
                     className="h-full w-full border-0"
                   />
                 </div>
               ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-surface-2 via-surface to-background">
-                  <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent shadow-inner">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground sm:text-xl">
-                    No Direct Matches Found
-                  </h3>
-                  <p className="mt-1 max-w-md text-xs text-muted leading-relaxed sm:text-sm">
-                    Search Dailymotion with a custom keyword or sub group:
-                  </p>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      searchCustomDailymotion();
-                    }}
-                    className="mt-4 flex w-full max-w-sm items-center gap-2"
-                  >
-                    <input
-                      type="text"
-                      value={dmSearchInput}
-                      onChange={(e) => setDmSearchInput(e.target.value)}
-                      placeholder={`e.g. ${animeTitle} ${episode}`}
-                      className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-xs text-foreground placeholder:text-muted focus:border-accent focus:outline-none"
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-lg bg-accent px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-accent-hover cursor-pointer"
-                    >
-                      Search
-                    </button>
-                  </form>
-                  <div className="mt-3 flex items-center gap-2">
-                    <a
-                      href={defaultSrc}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-accent underline hover:text-accent-hover"
-                    >
-                      Open Dailymotion in new tab ↗
-                    </a>
-                  </div>
+                <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-surface">
+                  <p className="text-sm font-semibold text-muted">No Dailymotion stream found for Episode {episode}.</p>
+                  <p className="mt-1 text-xs text-muted/80">Try switching server or searching custom keywords below.</p>
                 </div>
               )
             ) : server.isExternalHost ? (
@@ -391,8 +351,8 @@ export function WatchClient({
                 src={defaultSrc}
                 title={`${displayTitle(anime)} — Episode ${episode}`}
                 allowFullScreen
-                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                referrerPolicy="origin"
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
+                referrerPolicy="no-referrer"
                 className="h-full w-full"
               />
             )}

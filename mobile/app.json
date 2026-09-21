@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "AnimeWatch",
+    "slug": "animewatch",
+    "owner": "lylr",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "scheme": "animewatch",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0b0c10"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lylr.animewatch"
+    },
+    "android": {
+      "package": "com.lylr.animewatch",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0c10",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-video"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ba29a4ab-70ca-4d83-9845-101a3a7f5c76"
+      }
+    }
+  }
+}
