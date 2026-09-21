@@ -32,7 +32,7 @@ Overhaul the mobile experience with adaptive layout modes accessible via the mai
 ---
 
 ## 🛠 Technical Tasks & Implementation Roadmap
-- [ ] Implement global Mode Context & Header/Hamburger switcher (`Anime` | `Movies` | `Series` | `Manga`).
-- [ ] Refactor mobile Hero Spotlights & Row Carousels with touch-pan swipe gestures (`touch-pan-x`).
-- [ ] Create specialized mode layouts for Movies, Series, and Anime.
-- [ ] Build Mihon-inspired mobile Manga catalog grid and source filter bar.
+- [x] Implement global Mode Context & Header/Hamburger switcher (`Anime` | `Movies` | `Series` | `Manga`).
+- [x] Refactor mobile Hero Spotlights & Row Carousels with touch-pan swipe gestures (`touch-pan-x`).
+- [x] Create specialized mode layouts for Movies, Series, and Anime.
+- [x] Build Mihon-inspired mobile Manga catalog grid and source filter bar.

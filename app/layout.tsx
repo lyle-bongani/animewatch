@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { AdultGateProvider } from "@/components/AdultGateContext";
+import { ModeProvider } from "@/components/ModeContext";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -45,10 +46,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AdultGateProvider>
-          <Navbar />
-          <main className="flex-1 pb-20 sm:pb-0">{children}</main>
-          {modal}
-          <Footer />
+          <ModeProvider>
+            <Navbar />
+            <main className="flex-1 pb-20 sm:pb-0">{children}</main>
+            {modal}
+            <Footer />
+          </ModeProvider>
         </AdultGateProvider>
       </body>
     </html>

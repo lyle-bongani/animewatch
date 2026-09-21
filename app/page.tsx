@@ -1,7 +1,4 @@
-import { HeroSpotlight } from "@/components/HeroSpotlight";
-import { AnimeRow } from "@/components/AnimeRow";
-import { ContinueWatching } from "@/components/ContinueWatching";
-import { RecentEpisodes } from "@/components/RecentEpisodes";
+import { AdaptiveHome } from "@/components/AdaptiveHome";
 import {
   getTrending,
   getPopular,
@@ -10,51 +7,84 @@ import {
   getRecentlyAired,
   getIsekai,
 } from "@/lib/anilist";
+import { getCinemetaMovies, getCinemetaSeries } from "@/lib/cinemeta";
+import { getAsuraLatest } from "@/lib/asura";
+
+export const revalidate = 1800; // Cache page for 30 minutes
 
 export default async function Home() {
-  const [trending, popular, topRated, airing, recentlyAired, isekai] = await Promise.all([
-    getTrending(20),
-    getPopular(18),
-    getTopRated(18),
-    getAiringNow(18),
-    getRecentlyAired(12),
-    getIsekai(18),
+  const [
+    animeTrending,
+    animePopular,
+    animeTopRated,
+    animeAiring,
+    animeRecentlyAired,
+    animeIsekai,
+    moviesTrending,
+    moviesAction,
+    moviesScifi,
+    moviesDrama,
+    moviesComedy,
+    seriesTrending,
+    seriesCrime,
+    seriesDrama,
+    seriesAction,
+    seriesComedy,
+    mangaComics,
+  ] = await Promise.all([
+    // Anime dataset
+    getTrending(20).catch(() => []),
+    getPopular(18).catch(() => []),
+    getTopRated(18).catch(() => []),
+    getAiringNow(18).catch(() => []),
+    getRecentlyAired(12).catch(() => []),
+    getIsekai(18).catch(() => []),
+
+    // Movies dataset
+    getCinemetaMovies(undefined, 20).catch(() => []),
+    getCinemetaMovies("Action", 20).catch(() => []),
+    getCinemetaMovies("Sci-Fi", 20).catch(() => []),
+    getCinemetaMovies("Drama", 20).catch(() => []),
+    getCinemetaMovies("Comedy", 20).catch(() => []),
+
+    // Series dataset
+    getCinemetaSeries(undefined, 20).catch(() => []),
+    getCinemetaSeries("Crime", 20).catch(() => []),
+    getCinemetaSeries("Drama", 20).catch(() => []),
+    getCinemetaSeries("Action", 20).catch(() => []),
+    getCinemetaSeries("Comedy", 20).catch(() => []),
+
+    // Manga dataset
+    getAsuraLatest(1).catch(() => []),
   ]);
 
-  const spotlight = trending.length > 0 ? trending.slice(0, 5) : popular.slice(0, 5);
-  const hasSpotlight = spotlight.length > 0;
-
   return (
-    // Pull up under the sticky nav ONLY when billboard spotlight is rendered
-    <div className={hasSpotlight ? "-mt-16 pb-12" : "pt-4 pb-12"}>
-      {hasSpotlight && <HeroSpotlight items={spotlight} />}
-
-      {/* Netflix-style stack of horizontal carousels */}
-      <div className="relative z-10 flex flex-col gap-8 pt-8 sm:gap-12">
-        <ContinueWatching />
-        {trending.length > 0 && (
-          <AnimeRow title="Trending Now" items={trending.slice(0, 10)} href="/search?q=trending" numbered />
-        )}
-        {airing.length > 0 && (
-          <AnimeRow title="New & Popular This Season" items={airing} href="/new" />
-        )}
-        {popular.length > 0 && (
-          <AnimeRow title="Popular on AnimeWatch" items={popular} href="/search?q=popular" />
-        )}
-        {topRated.length > 0 && (
-          <AnimeRow title="Top Rated" items={topRated} href="/search?q=top" />
-        )}
-        {isekai.length > 0 && (
-          <AnimeRow title="Isekai & Fantasy Worlds" items={isekai} href="/isekai" />
-        )}
-
-        {/* Recently released episodes (grid keeps the per-episode badges) */}
-        {recentlyAired.length > 0 && (
-          <section className="mx-auto w-full max-w-7xl px-4">
-            <RecentEpisodes items={recentlyAired} />
-          </section>
-        )}
-      </div>
-    </div>
+    <AdaptiveHome
+      animeData={{
+        trending: animeTrending,
+        popular: animePopular,
+        topRated: animeTopRated,
+        airing: animeAiring,
+        recentlyAired: animeRecentlyAired,
+        isekai: animeIsekai,
+      }}
+      moviesData={{
+        trending: moviesTrending,
+        action: moviesAction,
+        scifi: moviesScifi,
+        drama: moviesDrama,
+        comedy: moviesComedy,
+      }}
+      seriesData={{
+        trending: seriesTrending,
+        crime: seriesCrime,
+        drama: seriesDrama,
+        action: seriesAction,
+        comedy: seriesComedy,
+      }}
+      mangaData={{
+        comics: mangaComics,
+      }}
+    />
   );
 }

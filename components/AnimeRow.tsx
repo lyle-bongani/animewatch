@@ -10,22 +10,18 @@ export function AnimeRow({
   items,
   href,
   numbered = false,
+  mode,
 }: {
   title: string;
   items: Anime[];
   href?: string;
   /** Render large ranking numbers behind each card (Trending Poster Card). */
   numbered?: boolean;
+  mode?: "anime" | "movies" | "series";
 }) {
   const scroller = useRef<HTMLDivElement>(null);
 
   if (items.length === 0) return null;
-
-  const scrollByPage = (dir: number) => {
-    const el = scroller.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
-  };
 
   return (
     <section className="group/row mx-auto max-w-7xl px-4">
@@ -47,7 +43,7 @@ export function AnimeRow({
       <div className="relative">
         <div
           ref={scroller}
-          className="nflx-row no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-10 touch-pan-x sm:gap-4"
+          className="nflx-row no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 py-8 touch-pan-x sm:gap-4 scroll-smooth"
         >
           {items.map((a, i) => (
             <div
@@ -66,7 +62,7 @@ export function AnimeRow({
                 </span>
               )}
               <div className={numbered ? "w-28 shrink-0 sm:w-32 lg:w-36" : "w-full"}>
-                <AnimeCard anime={a} />
+                <AnimeCard anime={a} mode={mode} />
               </div>
             </div>
           ))}
