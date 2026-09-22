@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import type { AsuraSeriesCard } from "@/lib/asura";
+import { POPULAR_MANGA_SOURCES } from "@/lib/extensions";
 import { MihonMangaDrawer } from "./MihonMangaDrawer";
 
 interface MangaProgress {
