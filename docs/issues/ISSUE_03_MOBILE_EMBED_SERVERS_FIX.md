@@ -2,7 +2,7 @@
 
 ## 📌 Summary
 **Assigned To:** Lyle (Lead Developer)
-**Status:** In Progress ⚙️
+**Status:** Completed ✅
 
 Third-party video streaming servers (VidNest/HD-1, VidCloud, VidLink, Dailymotion, LuciferDonghua, Cinemeta) work smoothly on desktop browsers, but fail or encounter playback errors on mobile devices/mobile WebViews. This issue addresses mobile user-agent restrictions, missing iframe permission policies, referrer restrictions, and mobile touch overlay handling across Movies, TV Series, and Anime.
 
