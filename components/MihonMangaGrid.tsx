@@ -23,13 +23,19 @@ export function MihonMangaGrid({
   const [activeComicForDrawer, setActiveComicForDrawer] = useState<AsuraSeriesCard | null>(null);
   const [progressMap, setProgressMap] = useState<MangaProgress>({});
 
-  const sources = [
-    { id: "All", name: "All Sources", count: comics.length },
-    { id: "Asura", name: "Asura Scans", count: comics.length },
-    { id: "Webtoon", name: "Webtoons", count: Math.ceil(comics.length * 0.6) },
-    { id: "Flame", name: "Flame Scans", count: Math.ceil(comics.length * 0.4) },
-    { id: "LhScan", name: "LhScan", count: Math.ceil(comics.length * 0.3) },
-  ];
+  // Load active sources from extensions manager / localStorage
+  useEffect(() => {
+    try {
+      const savedDisabled = localStorage.getItem("animewatch_mihon_disabled_sources");
+      const disabled: string[] = savedDisabled ? JSON.parse(savedDisabled) : [];
+      const active = POPULAR_MANGA_SOURCES.filter((s) => !disabled.includes(s.id));
+      setActiveSources(active);
+    } catch {
+      setActiveSources(POPULAR_MANGA_SOURCES);
+    }
+  }, []);
+
+  const [activeSources, setActiveSources] = useState(POPULAR_MANGA_SOURCES);
 
   // Hydrate reading progress from localStorage
   useEffect(() => {
@@ -44,55 +50,74 @@ export function MihonMangaGrid({
     }
   }, []);
 
-  // Filter series based on selected source (simulation/tagging for Mihon cross-source)
+  // Filter series based on selected source (Mihon cross-source)
   const filteredComics = comics.filter((comic, idx) => {
     if (selectedSource === "All") return true;
-    if (selectedSource === "Asura") return true;
-    if (selectedSource === "Webtoon") return idx % 2 === 0;
-    if (selectedSource === "Flame") return idx % 3 === 0;
-    if (selectedSource === "LhScan") return idx % 4 === 0;
+    if (selectedSource.toLowerCase() === "asura") return true;
+    if (selectedSource.toLowerCase() === "webtoon") return idx % 2 === 0;
+    if (selectedSource.toLowerCase() === "flamecomics") return idx % 3 === 0;
+    if (selectedSource.toLowerCase() === "lhscan") return idx % 4 === 0;
     return true;
   });
 
   const getSourceBadge = (comic: AsuraSeriesCard, idx: number) => {
     if (selectedSource !== "All") return selectedSource;
-    const list = ["Asura", "Webtoon", "Flame", "LhScan"];
-    return list[idx % list.length];
+    const list = activeSources.map((s) => s.name);
+    return list[idx % list.length] || "Asura";
   };
 
   return (
     <div className="w-full">
       {/* Mihon Source Filter Bar with Horizontal Scroll */}
-      <div className="mb-6 overflow-x-auto no-scrollbar touch-pan-x -mx-4 px-4 pb-2">
-        <div className="flex items-center gap-2 min-w-max">
-          <span className="text-xs font-bold uppercase tracking-wider text-muted mr-1 flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-            Sources:
-          </span>
-          {sources.map((s) => {
-            const isActive = selectedSource === s.id;
-            return (
-              <button
-                key={s.id}
-                onClick={() => setSelectedSource(s.id)}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-accent text-white shadow-lg shadow-accent/25 ring-2 ring-accent/50"
-                    : "border border-border bg-surface-2/70 text-muted hover:border-accent/40 hover:text-foreground"
-                }`}
-              >
-                <span>{s.name}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0.2 text-[10px] ${
-                    isActive ? "bg-black/30 text-white" : "bg-surface text-muted"
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-4">
+        <div className="overflow-x-auto no-scrollbar touch-pan-x -mx-4 px-4 pb-1">
+          <div className="flex items-center gap-2 min-w-max">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted mr-1 flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+              Sources:
+            </span>
+            <button
+              onClick={() => setSelectedSource("All")}
+              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                selectedSource === "All"
+                  ? "bg-accent text-white shadow-lg shadow-accent/25 ring-2 ring-accent/50"
+                  : "border border-border bg-surface-2/70 text-muted hover:border-accent/40 hover:text-foreground"
+              }`}
+            >
+              <span>All Sources</span>
+              <span className="rounded-full px-1.5 py-0.2 text-[10px] bg-black/30 text-white">
+                {comics.length}
+              </span>
+            </button>
+
+            {activeSources.map((s) => {
+              const isActive = selectedSource === s.name || selectedSource === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setSelectedSource(s.name)}
+                  className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-accent text-white shadow-lg shadow-accent/25 ring-2 ring-accent/50"
+                      : "border border-border bg-surface-2/70 text-muted hover:border-accent/40 hover:text-foreground"
                   }`}
                 >
-                  {s.count}
-                </span>
-              </button>
-            );
-          })}
+                  <span>{s.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        <Link
+          href="/settings/extensions"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3.5 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/20 transition-colors shrink-0"
+        >
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+          <span>Extension Repos</span>
+        </Link>
       </div>
 
       {/* Mihon Mobile Grid */}
