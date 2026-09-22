@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -9,22 +9,43 @@ import {
 } from "react-native";
 import { WebView } from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
-import { getAnimeStreamSources, type StreamServer } from "../lib/streaming";
+import { getStreamSources, type StreamServer } from "../lib/streaming";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface VideoPlayerProps {
   id: number | string;
+  imdbId?: string | null;
+  type?: "anime" | "movie" | "tv" | "donghua";
+  season?: number;
   episode?: number;
+  slug?: string;
   title?: string;
 }
 
-export function VideoPlayer({ id, episode = 1, title }: VideoPlayerProps) {
-  const servers = getAnimeStreamSources(id, episode);
+export function VideoPlayer({
+  id,
+  imdbId,
+  type = "anime",
+  season = 1,
+  episode = 1,
+  slug = "",
+  title,
+}: VideoPlayerProps) {
+  const servers = getStreamSources({ id, imdbId, type, season, episode, slug });
   const [selectedServer, setSelectedServer] = useState<StreamServer>(servers[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [key, setKey] = useState(1);
+
+  useEffect(() => {
+    const updatedServers = getStreamSources({ id, imdbId, type, season, episode, slug });
+    if (updatedServers.length > 0) {
+      setSelectedServer(updatedServers[0]);
+      setLoading(true);
+      setError(false);
+    }
+  }, [id, imdbId, type, season, episode, slug]);
 
   const handleRetry = () => {
     setError(false);
@@ -34,15 +55,27 @@ export function VideoPlayer({ id, episode = 1, title }: VideoPlayerProps) {
 
   return (
     <View style={styles.container}>
-      {/* 16:9 Video Frame */}
+      {/* 16:9 Responsive Video Frame */}
       <View style={styles.playerFrame}>
         <WebView
           key={`${selectedServer.url}-${key}`}
-          source={{ uri: selectedServer.url }}
+          source={{
+            uri: selectedServer.url,
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+            },
+          }}
           style={styles.webview}
           javaScriptEnabled
           domStorageEnabled
           allowsFullscreenVideo
+          allowsInlineMediaPlayback={true}
+          originWhitelist={["*"]}
+          mixedContentMode="always"
+          thirdPartyCookiesEnabled={true}
+          sharedCookiesEnabled={true}
+          allowsProtectedMedia={true}
+          setSupportMultipleWindows={false}
           mediaPlaybackRequiresUserAction={false}
           onLoadStart={() => setLoading(true)}
           onLoadEnd={() => setLoading(false)}
@@ -50,13 +83,13 @@ export function VideoPlayer({ id, episode = 1, title }: VideoPlayerProps) {
             setLoading(false);
             setError(true);
           }}
-          userAgent="Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+          userAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
         />
 
         {loading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#e50914" />
-            <Text style={styles.loadingText}>Connecting to stream...</Text>
+            <Text style={styles.loadingText}>Connecting to video server ({selectedServer.name})...</Text>
           </View>
         )}
 
@@ -65,7 +98,7 @@ export function VideoPlayer({ id, episode = 1, title }: VideoPlayerProps) {
             <Ionicons name="alert-circle-outline" size={36} color="#e50914" />
             <Text style={styles.errorTitle}>Stream Connection Failed</Text>
             <Text style={styles.errorSubtitle}>
-              Please switch to another server below or try again.
+              Please switch to another server below or try retrying.
             </Text>
             <TouchableOpacity
               style={styles.retryBtn}
@@ -83,7 +116,7 @@ export function VideoPlayer({ id, episode = 1, title }: VideoPlayerProps) {
       <View style={styles.serverSection}>
         <View style={styles.serverHeader}>
           <Ionicons name="server-outline" size={14} color="#8b949e" />
-          <Text style={styles.serverLabel}>Select Video Server</Text>
+          <Text style={styles.serverLabel}>Select Streaming Server ({type.toUpperCase()})</Text>
         </View>
 
         <View style={styles.serverList}>

@@ -18,12 +18,29 @@ import { VideoPlayer } from "../../components/VideoPlayer";
 
 export default function WatchScreen() {
   const router = useRouter();
-  const { id, ep } = useLocalSearchParams<{ id: string; ep?: string }>();
+  const {
+    id,
+    ep,
+    type = "anime",
+    season,
+    imdbId,
+    slug,
+    title,
+  } = useLocalSearchParams<{
+    id: string;
+    ep?: string;
+    type?: "anime" | "movie" | "tv" | "donghua";
+    season?: string;
+    imdbId?: string;
+    slug?: string;
+    title?: string;
+  }>();
+
   const [currentEp, setCurrentEp] = useState<number>(ep ? Number(ep) : 1);
   const [anime, setAnime] = useState<Anime | null>(null);
 
   useEffect(() => {
-    if (id) {
+    if (id && type === "anime") {
       getAnimeDetails(Number(id)).then((data) => {
         setAnime(data);
         if (data) {
@@ -45,14 +62,15 @@ export default function WatchScreen() {
         }
       });
     }
-  }, [id, currentEp]);
+  }, [id, currentEp, type]);
 
   const totalEpisodes = anime?.episodes || 12;
   const episodeList = Array.from({ length: totalEpisodes }, (_, i) => i + 1);
+  const mediaTitle = title || (anime ? displayTitle(anime) : type.toUpperCase());
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      {/* Top Bar */}
+      {/* Top Navigation Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -64,74 +82,84 @@ export default function WatchScreen() {
 
         <View style={styles.titleContainer}>
           <Text style={styles.animeTitle} numberOfLines={1}>
-            {anime ? displayTitle(anime) : "Streaming"}
+            {mediaTitle}
           </Text>
-          <Text style={styles.epSubtitle}>Episode {currentEp}</Text>
+          <Text style={styles.epSubtitle}>
+            {type === "movie" ? "Movie Stream" : `Episode ${currentEp}`}
+          </Text>
         </View>
       </View>
 
-      {/* Video Player */}
+      {/* Video Player Frame */}
       {id && (
         <VideoPlayer
           id={id}
+          imdbId={imdbId}
+          type={type}
+          season={season ? Number(season) : 1}
           episode={currentEp}
-          title={anime ? displayTitle(anime) : undefined}
+          slug={slug}
+          title={mediaTitle}
         />
       )}
 
-      {/* Player Navigation Controls */}
-      <View style={styles.navControls}>
-        <TouchableOpacity
-          style={[styles.epNavBtn, currentEp <= 1 && styles.epNavBtnDisabled]}
-          disabled={currentEp <= 1}
-          onPress={() => setCurrentEp((prev) => Math.max(1, prev - 1))}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="play-skip-back" size={14} color="#ffffff" />
-          <Text style={styles.epNavText}>Previous Episode</Text>
-        </TouchableOpacity>
+      {/* Player Navigation Controls for Series/Anime */}
+      {type !== "movie" && (
+        <View style={styles.navControls}>
+          <TouchableOpacity
+            style={[styles.epNavBtn, currentEp <= 1 && styles.epNavBtnDisabled]}
+            disabled={currentEp <= 1}
+            onPress={() => setCurrentEp((prev) => Math.max(1, prev - 1))}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="play-skip-back" size={14} color="#ffffff" />
+            <Text style={styles.epNavText}>Previous Episode</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.epNavBtn,
-            currentEp >= totalEpisodes && styles.epNavBtnDisabled,
-          ]}
-          disabled={currentEp >= totalEpisodes}
-          onPress={() => setCurrentEp((prev) => prev + 1)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.epNavText}>Next Episode</Text>
-          <Ionicons name="play-skip-forward" size={14} color="#ffffff" />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[
+              styles.epNavBtn,
+              currentEp >= totalEpisodes && styles.epNavBtnDisabled,
+            ]}
+            disabled={currentEp >= totalEpisodes}
+            onPress={() => setCurrentEp((prev) => prev + 1)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.epNavText}>Next Episode</Text>
+            <Ionicons name="play-skip-forward" size={14} color="#ffffff" />
+          </TouchableOpacity>
+        </View>
+      )}
 
-      {/* Episode Selector */}
-      <View style={styles.episodeSection}>
-        <Text style={styles.epListHeading}>Select Episode</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.epScrollRow}
-        >
-          {episodeList.map((epNum) => {
-            const isCurrent = epNum === currentEp;
-            return (
-              <TouchableOpacity
-                key={epNum}
-                style={[styles.epBadge, isCurrent && styles.epBadgeActive]}
-                onPress={() => setCurrentEp(epNum)}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[styles.epBadgeText, isCurrent && styles.epBadgeTextActive]}
+      {/* Episode Selector Grid */}
+      {type !== "movie" && (
+        <View style={styles.episodeSection}>
+          <Text style={styles.epListHeading}>Select Episode</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.epScrollRow}
+          >
+            {episodeList.map((epNum) => {
+              const isCurrent = epNum === currentEp;
+              return (
+                <TouchableOpacity
+                  key={epNum}
+                  style={[styles.epBadge, isCurrent && styles.epBadgeActive]}
+                  onPress={() => setCurrentEp(epNum)}
+                  activeOpacity={0.8}
                 >
-                  {epNum}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+                  <Text
+                    style={[styles.epBadgeText, isCurrent && styles.epBadgeTextActive]}
+                  >
+                    {epNum}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
