@@ -117,6 +117,17 @@ export function HeroSpotlight({
 
   const hasTrailer = a.trailer?.site === "youtube" && a.trailer.id;
 
+  const detailHref =
+    mode === "manga"
+      ? `/manga/${a.id}`
+      : isMovie
+      ? `/movies/${a.id}`
+      : isSeries
+      ? `/series/${a.id}`
+      : `/anime/${a.id}`;
+
+  const playHref = mode === "manga" ? `/manga/${a.id}` : `/watch/${a.id}`;
+
   const getRankBadge = () => {
     if (mode === "movies") return `#${index + 1} in Movies Today`;
     if (mode === "series") return `#${index + 1} in TV Shows Today`;
@@ -218,13 +229,20 @@ export function HeroSpotlight({
           <div className="mt-5 flex flex-wrap items-center gap-2 sm:mt-6 sm:gap-3">
             {/* White Primary Play CTA */}
             <Link
-              href={`/watch/${a.id}`}
+              href={playHref}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-black shadow-lg shadow-white/10 transition-all hover:bg-white/90 active:scale-95 sm:px-7 sm:py-3 sm:text-base cursor-pointer"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              <span>Watch Now</span>
+              {mode === "manga" ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                </svg>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+              <span>{mode === "manga" ? "Read Now" : "Watch Now"}</span>
             </Link>
 
             {/* Watchlist Toggle Button */}
@@ -265,7 +283,7 @@ export function HeroSpotlight({
 
             {/* More Info Link */}
             <Link
-              href={`/anime/${a.id}`}
+              href={detailHref}
               className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-zinc-600/40 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all hover:bg-zinc-600/60 active:scale-95 sm:px-5 sm:py-3 sm:text-base cursor-pointer"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

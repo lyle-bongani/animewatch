@@ -36,7 +36,8 @@ function parseNumericId(meta: CinemetaMeta): number {
 }
 
 export function toAnimeModel(meta: CinemetaMeta): Anime {
-  const primaryId = meta.imdb_id || meta.id;
+  const rawId = meta.imdb_id || meta.id || "";
+  const primaryId = rawId.replace(/^(movie|series)[:_-]/, "");
   const rawGenres = meta.genres || meta.genre || [];
   const score = meta.imdbRating ? Math.round(parseFloat(meta.imdbRating) * 10) : 80;
   const year = parseInt(meta.year || meta.releaseInfo || "2024", 10) || 2024;

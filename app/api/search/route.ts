@@ -135,15 +135,74 @@ export async function GET(request: Request) {
     return NextResponse.json({ results: [] });
   }
 
-  const [{ media }, cinemeta] = await Promise.all([
-    searchAnime(q, 1, 6).catch(() => ({ media: [] })),
-    searchCinemeta(q, 6).catch(() => []),
+  // Multi-source search across Anime, Cinemeta (Movies & TV), and AsuraScans (Manga)
+  const [{ media }, cinemeta, manga] = await Promise.all([
+    mode === "manga"
+      ? Promise.resolve({ media: [] })
+      : searchAnime(q, 1, 6).catch(() => ({ media: [] })),
+    mode === "manga" || mode === "anime"
+      ? Promise.resolve([])
+      : searchCinemeta(q, 6).catch(() => []),
+    mode === "movies" || mode === "series"
+      ? Promise.resolve([])
+      : (await import("@/lib/asura")).searchAsura(q).catch(() => []),
   ]);
 
-  const combined = [...cinemeta, ...media];
+  const normalizedResults: Array<{
+    id: string | number;
+    title: string;
+    coverImage: string;
+    format?: string | null;
+    seasonYear?: number | string | null;
+    mediaType: "anime" | "movie" | "series" | "manga";
+    href: string;
+  }> = [];
+
+  // Normalize Cinemeta items (Movies & TV Series)
+  for (const item of cinemeta) {
+    const isMovie = item.format === "MOVIE";
+    normalizedResults.push({
+      id: item.id,
+      title: item.title.english || item.title.romaji || "Untitled",
+      coverImage: item.coverImage?.large ?? item.coverImage?.extraLarge ?? "",
+      format: isMovie ? "Movie" : "TV Series",
+      seasonYear: item.seasonYear,
+      mediaType: isMovie ? "movie" : "series",
+      href: isMovie ? `/movies/${item.id}` : `/series/${item.id}`,
+    });
+  }
+
+  // Normalize Anime items
+  for (const item of media) {
+    const isMovie = item.format === "MOVIE";
+    normalizedResults.push({
+      id: item.id,
+      title: item.title.english || item.title.romaji || item.title.native || "Untitled",
+      coverImage: item.coverImage?.large ?? item.coverImage?.extraLarge ?? "",
+      format: item.format || "Anime",
+      seasonYear: item.seasonYear,
+      mediaType: isMovie ? "movie" : "anime",
+      href: isMovie ? `/movies/${item.id}` : `/anime/${item.id}`,
+    });
+  }
+
+  // Normalize Manga items
+  for (const item of manga) {
+    normalizedResults.push({
+      id: item.slug,
+      title: item.title,
+      coverImage: item.cover,
+      format: "Manga",
+      seasonYear: item.latestChapter ? `Ch. ${item.latestChapter}` : "Manhwa",
+      mediaType: "manga",
+      href: `/manga/${item.slug}`,
+    });
+  }
+
+  // Deduplicate results
   const seen = new Set<string>();
-  const unique = combined.filter((item) => {
-    const key = `${item.id}`;
+  const unique = normalizedResults.filter((item) => {
+    const key = `${item.mediaType}:${item.id}`;
     if (seen.has(key)) return false;
     seen.add(key);
     return true;

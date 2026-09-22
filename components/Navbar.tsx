@@ -8,13 +8,23 @@ import { displayTitle, formatLabel } from "@/lib/types";
 import { ALL_GENRES } from "@/lib/genres";
 import { useAppMode, type AppMode } from "@/components/ModeContext";
 
+interface SearchDropdownResult {
+  id: string | number;
+  title: string | { english?: string | null; romaji?: string | null; native?: string | null };
+  coverImage?: { large?: string | null } | string;
+  format?: string | null;
+  seasonYear?: number | string | null;
+  mediaType?: "anime" | "movie" | "series" | "manga";
+  href?: string;
+}
+
 export function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { mode, setMode, modesList, modeInfo } = useAppMode();
 
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Anime[]>([]);
+  const [results, setResults] = useState<SearchDropdownResult[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,10 +52,10 @@ export function Navbar() {
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&mode=${encodeURIComponent(mode)}`, {
           signal: ctrl.signal,
         });
-        const data = (await res.json()) as { results: Anime[] };
+        const data = (await res.json()) as { results: SearchDropdownResult[] };
         setResults(data.results.slice(0, 6));
         setOpen(true);
       } catch {
@@ -155,30 +165,69 @@ export function Navbar() {
               {loading && results.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-muted">Searching…</div>
               ) : (
-                results.map((a) => (
-                  <Link
-                    key={a.id}
-                    href={`/anime/${a.id}`}
-                    onClick={() => setOpen(false)}
-                    className="flex gap-3 px-3 py-2 transition-colors hover:bg-surface-2"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={a.coverImage.large ?? ""}
-                      alt=""
-                      className="h-16 w-12 shrink-0 rounded object-cover"
-                      loading="lazy"
-                    />
-                    <span className="min-w-0">
-                      <span className="line-clamp-2 text-sm font-medium">
-                        {displayTitle(a)}
+                results.map((a) => {
+                  const itemTitle =
+                    typeof a.title === "string"
+                      ? a.title
+                      : a.title.english || a.title.romaji || a.title.native || "Untitled";
+                  const coverSrc =
+                    typeof a.coverImage === "string"
+                      ? a.coverImage
+                      : a.coverImage?.large ?? "";
+                  const destination =
+                    a.href ||
+                    (a.mediaType === "movie"
+                      ? `/movies/${a.id}`
+                      : a.mediaType === "series"
+                      ? `/series/${a.id}`
+                      : a.mediaType === "manga"
+                      ? `/manga/${a.id}`
+                      : `/anime/${a.id}`);
+
+                  return (
+                    <Link
+                      key={`${a.mediaType || "media"}-${a.id}`}
+                      href={destination}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-surface-2 group cursor-pointer"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={coverSrc}
+                        alt=""
+                        className="h-14 w-10 shrink-0 rounded object-cover shadow-sm"
+                        loading="lazy"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          {a.mediaType === "movie" ? (
+                            <span className="rounded bg-blue-600/90 px-1.5 py-0.2 text-[8.5px] font-black uppercase tracking-wider text-white">
+                              Movie
+                            </span>
+                          ) : a.mediaType === "series" ? (
+                            <span className="rounded bg-emerald-600/90 px-1.5 py-0.2 text-[8.5px] font-black uppercase tracking-wider text-white">
+                              Series
+                            </span>
+                          ) : a.mediaType === "manga" ? (
+                            <span className="rounded bg-amber-600/90 px-1.5 py-0.2 text-[8.5px] font-black uppercase tracking-wider text-white">
+                              Manga
+                            </span>
+                          ) : (
+                            <span className="rounded bg-accent px-1.5 py-0.2 text-[8.5px] font-black uppercase tracking-wider text-white">
+                              Anime
+                            </span>
+                          )}
+                          {a.seasonYear && (
+                            <span className="text-[10px] text-muted">{a.seasonYear}</span>
+                          )}
+                        </div>
+                        <span className="line-clamp-1 text-xs sm:text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
+                          {itemTitle}
+                        </span>
                       </span>
-                      <span className="mt-1 block text-xs text-muted">
-                        {[formatLabel(a.format), a.seasonYear].filter(Boolean).join(" · ")}
-                      </span>
-                    </span>
-                  </Link>
-                ))
+                    </Link>
+                  );
+                })
               )}
               <button
                 onClick={submit}

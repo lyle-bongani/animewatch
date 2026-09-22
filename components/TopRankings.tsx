@@ -15,11 +15,12 @@ export function TopRankings({ items }: { items: Anime[] }) {
         {items.slice(0, 10).map((anime, idx) => {
           const rank = idx + 1;
           const score = anime.averageScore ? (anime.averageScore / 10).toFixed(1) : "N/A";
+          const href = anime.format === "MOVIE" ? `/movies/${anime.id}` : `/anime/${anime.id}`;
           
           return (
             <Link
               key={anime.id}
-              href={`/anime/${anime.id}`}
+              href={href}
               className="flex items-center gap-4 group border-b border-border/40 pb-3 last:border-0 last:pb-0"
             >
               {/* Rank Number */}

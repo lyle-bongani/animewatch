@@ -98,13 +98,22 @@ export default function WatchlistPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-          {watchlist.map((anime) => (
-            <Link
-              key={anime.id}
-              href={`/anime/${anime.id}`}
-              className="group block relative focus:outline-none"
-              title={anime.title}
-            >
+          {watchlist.map((anime) => {
+            const isMovie = anime.format === "MOVIE";
+            const isSeries = anime.format === "TV" && String(anime.id).startsWith("tt");
+            const href = isMovie
+              ? `/movies/${anime.id}`
+              : isSeries
+              ? `/series/${anime.id}`
+              : `/anime/${anime.id}`;
+
+            return (
+              <Link
+                key={anime.id}
+                href={href}
+                className="group block relative focus:outline-none"
+                title={anime.title}
+              >
               <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface-2 ring-1 ring-border transition-all group-hover:ring-accent">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

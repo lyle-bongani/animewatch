@@ -29,9 +29,15 @@ export function AnimeCard({
   const isSeries = mode === "series" || (anime.streamingEpisodes && anime.streamingEpisodes.length > 1);
   const isChinese = anime.countryOfOrigin === "CN";
 
+  const href = isMovie
+    ? `/movies/${anime.id}`
+    : isSeries
+    ? `/series/${anime.id}`
+    : `/anime/${anime.id}`;
+
   return (
     <Link
-      href={`/anime/${anime.id}`}
+      href={href}
       className="netflix-card group block focus:outline-none select-none"
       title={displayTitle(anime)}
     >

@@ -28,16 +28,29 @@ export function WatchClient({
   anime,
   totalEpisodes,
   initialEpisode,
+  initialSeason = 1,
   streamingEpisodes,
 }: {
   anime: Anime;
   totalEpisodes: number;
   initialEpisode: number;
+  initialSeason?: number;
   streamingEpisodes: StreamingEpisode[];
 }) {
   const isChinese = anime.countryOfOrigin === "CN";
 
-  const [episode, setEpisode] = useState(initialEpisode);
+  // If streamingEpisodes has structured seasons and episodes, match initialSeason and initialEpisode
+  const computedInitialIndex = useMemo(() => {
+    if (streamingEpisodes && streamingEpisodes.length > 0) {
+      const idx = streamingEpisodes.findIndex(
+        (ep) => (ep.season || 1) === initialSeason && (ep.episode || 1) === initialEpisode
+      );
+      if (idx !== -1) return idx + 1;
+    }
+    return initialEpisode;
+  }, [streamingEpisodes, initialSeason, initialEpisode]);
+
+  const [episode, setEpisode] = useState(computedInitialIndex);
   const [serverId, setServerId] = useState(() => {
     if (isChinese) return "luciferdonghua";
     return SERVERS.find((s) => s.id === "vidnest")?.id ?? SERVERS[0].id;
@@ -223,6 +236,11 @@ export function WatchClient({
 
   function changeEpisode(n: number) {
     setEpisode(n);
+    const epMeta = streamingEpisodes?.[n - 1];
+    const s = epMeta?.season || 1;
+    const e = epMeta?.episode || n;
+    const searchParamsStr = epMeta?.season ? `?season=${s}&ep=${e}` : `?ep=${e}`;
+    window.history.replaceState(null, "", `/watch/${anime.id}${searchParamsStr}`);
     setIframeKey((k) => k + 1);
   }
 
@@ -242,7 +260,16 @@ export function WatchClient({
           Home
         </Link>{" "}
         /{" "}
-        <Link href={`/anime/${anime.id}`} className="hover:text-foreground">
+        <Link
+          href={
+            anime.format === "MOVIE"
+              ? `/movies/${anime.id}`
+              : anime.format === "TV" && String(anime.id).startsWith("tt")
+              ? `/series/${anime.id}`
+              : `/anime/${anime.id}`
+          }
+          className="hover:text-foreground"
+        >
           {displayTitle(anime)}
         </Link>{" "}
         / <span className="text-foreground">{anime.format === "MOVIE" ? "Full Movie" : `Episode ${episode}`}</span>
