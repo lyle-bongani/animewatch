@@ -1,12 +1,4 @@
-/**
- * Embed "servers" for playback.
- *
- * We do not host any video. Each server is a third-party iframe player keyed by
- * AniList ID + episode number + audio type (sub/dub). These providers are built
- * to be embedded and typically block plain HTTP clients, but render inside a
- * browser <iframe>. They go up and down often — that's why the player exposes
- * several and lets the viewer switch, exactly like 9anime/aniwatch do.
- */
+import type React from "react";
 
 export type AudioType = "sub" | "dub";
 
@@ -21,7 +13,9 @@ export interface EmbedServer {
   isDonghuaSpecialist?: boolean;
   /** Whether server is an external search/host player rather than an unblocked inline iframe. */
   isExternalHost?: boolean;
-  /** Build the iframe src for a given anime/episode. */
+  /** Custom referrer policy for this iframe server if needed */
+  referrerPolicy?: React.HTMLAttributeReferrerPolicy;
+  /** Build the iframe src for a given anime/series/movie. */
   build: (params: {
     anilistId?: number | string;
     malId?: number | string | null;
@@ -34,18 +28,41 @@ export interface EmbedServer {
   }) => string;
 }
 
+/** Helper: Clean IMDb ID by stripping movie:/series:/anime: prefixes and extracting pure ttXXXXXXX */
+function cleanImdb(id?: string | null): string {
+  if (!id) return "";
+  const cleaned = id.replace(/^(movie|series|anime)[:_-]/i, "").trim();
+  const match = cleaned.match(/tt\d+/i);
+  return match ? match[0] : cleaned.startsWith("tt") ? cleaned : "";
+}
+
+/** Helper: Clean AniList / Numeric ID */
+function cleanAniId(id?: number | string | null): string {
+  if (!id) return "";
+  return String(id).replace(/^ani/i, "").trim();
+}
+
+/** Helper: Ensure valid numeric MAL ID */
+function getValidMalId(malId?: number | string | null, anilistId?: number | string): string {
+  if (malId && !isNaN(Number(malId))) return String(malId);
+  if (anilistId && !isNaN(Number(anilistId))) return String(anilistId);
+  return cleanAniId(anilistId);
+}
+
 export const SERVERS: EmbedServer[] = [
   {
     id: "vidnest",
     name: "HD-1",
     supportsDub: true,
     build: ({ anilistId, imdbId, format, season, episode, type }) => {
-      if (imdbId) {
-        return format === "MOVIE"
-          ? `https://vidnest.fun/movie/${imdbId}`
-          : `https://vidnest.fun/tv/${imdbId}/${season || 1}/${episode}`;
+      const imdb = cleanImdb(imdbId || (String(anilistId).includes("tt") ? String(anilistId) : null));
+      if (imdb) {
+        const isMov = format === "MOVIE" || format === "movie";
+        return isMov
+          ? `https://vidnest.fun/movie/${imdb}`
+          : `https://vidnest.fun/tv/${imdb}/${season || 1}/${episode}`;
       }
-      return `https://vidnest.fun/anime/${anilistId}/${episode}/${type}`;
+      return `https://vidnest.fun/anime/${cleanAniId(anilistId)}/${episode}/${type}`;
     },
   },
   {
@@ -53,12 +70,14 @@ export const SERVERS: EmbedServer[] = [
     name: "VidCloud-1",
     supportsDub: true,
     build: ({ anilistId, imdbId, format, season, episode, type }) => {
-      if (imdbId) {
-        return format === "MOVIE"
-          ? `https://vidsrc.cc/v2/embed/movie/${imdbId}?autoPlay=false`
-          : `https://vidsrc.cc/v2/embed/tv/${imdbId}/${season || 1}/${episode}?autoPlay=false`;
+      const imdb = cleanImdb(imdbId || (String(anilistId).includes("tt") ? String(anilistId) : null));
+      if (imdb) {
+        const isMov = format === "MOVIE" || format === "movie";
+        return isMov
+          ? `https://vidsrc.cc/v2/embed/movie/${imdb}?autoPlay=false`
+          : `https://vidsrc.cc/v2/embed/tv/${imdb}/${season || 1}/${episode}?autoPlay=false`;
       }
-      return `https://vidsrc.cc/v2/embed/anime/ani${anilistId}/${episode}/${type}?autoPlay=false`;
+      return `https://vidsrc.cc/v2/embed/anime/ani${cleanAniId(anilistId)}/${episode}/${type}?autoPlay=false`;
     },
   },
   {
@@ -66,19 +85,52 @@ export const SERVERS: EmbedServer[] = [
     name: "Vidstream-2",
     supportsDub: true,
     build: ({ anilistId, malId, imdbId, format, season, episode, type }) => {
-      if (imdbId) {
-        return format === "MOVIE"
-          ? `https://vidlink.pro/movie/${imdbId}?fallback=true&primaryColor=e88b52`
-          : `https://vidlink.pro/tv/${imdbId}/${season || 1}/${episode}?fallback=true&primaryColor=e88b52`;
+      const imdb = cleanImdb(imdbId || (String(anilistId).includes("tt") ? String(anilistId) : null));
+      if (imdb) {
+        const isMov = format === "MOVIE" || format === "movie";
+        return isMov
+          ? `https://vidlink.pro/movie/${imdb}?fallback=true&primaryColor=e88b52`
+          : `https://vidlink.pro/tv/${imdb}/${season || 1}/${episode}?fallback=true&primaryColor=e88b52`;
       }
-      const id = malId || anilistId;
+      const id = getValidMalId(malId, anilistId);
       return `https://vidlink.pro/anime/${id}/${episode}/${type}?fallback=true&primaryColor=e88b52`;
+    },
+  },
+  {
+    id: "embedsu",
+    name: "HD-2",
+    supportsDub: false,
+    build: ({ anilistId, imdbId, format, season, episode }) => {
+      const imdb = cleanImdb(imdbId || (String(anilistId).includes("tt") ? String(anilistId) : null));
+      if (imdb) {
+        const isMov = format === "MOVIE" || format === "movie";
+        return isMov
+          ? `https://embed.su/embed/movie/${imdb}`
+          : `https://embed.su/embed/tv/${imdb}/${season || 1}/${episode}`;
+      }
+      return `https://embed.su/embed/anime/ani${cleanAniId(anilistId)}/${episode}`;
+    },
+  },
+  {
+    id: "vidsrcto",
+    name: "VidCloud-2",
+    supportsDub: false,
+    build: ({ anilistId, imdbId, format, season, episode }) => {
+      const imdb = cleanImdb(imdbId || (String(anilistId).includes("tt") ? String(anilistId) : null));
+      if (imdb) {
+        const isMov = format === "MOVIE" || format === "movie";
+        return isMov
+          ? `https://vidsrc.to/embed/movie/${imdb}`
+          : `https://vidsrc.to/embed/tv/${imdb}/${season || 1}/${episode}`;
+      }
+      return `https://vidsrc.to/embed/anime/ani${cleanAniId(anilistId)}/${episode}`;
     },
   },
   {
     id: "luciferdonghua",
     name: "LuciferDonghua",
     supportsDub: false,
+    isDonghuaSpecialist: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://luciferdonghua.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
@@ -98,6 +150,7 @@ export const SERVERS: EmbedServer[] = [
     id: "keyrafara",
     name: "Keyrafara",
     supportsDub: false,
+    isExternalHost: true,
     build: ({ slug }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://www.keyrafara.com/streaming/donghub?query=${encodeURIComponent(cleanSlug)}`;
@@ -107,6 +160,7 @@ export const SERVERS: EmbedServer[] = [
     id: "donghuastream",
     name: "DonghuaStream",
     supportsDub: false,
+    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://donghuastream.org/?s=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
@@ -116,6 +170,7 @@ export const SERVERS: EmbedServer[] = [
     id: "streamwish",
     name: "StreamWish",
     supportsDub: false,
+    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://streamwish.to/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
@@ -125,6 +180,7 @@ export const SERVERS: EmbedServer[] = [
     id: "filemoon",
     name: "Filemoon",
     supportsDub: false,
+    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://filemoon.sx/e/?search=${encodeURIComponent(cleanSlug + " " + episode)}`;
@@ -134,35 +190,10 @@ export const SERVERS: EmbedServer[] = [
     id: "streamtape",
     name: "Streamtape",
     supportsDub: false,
+    isExternalHost: true,
     build: ({ slug, episode }) => {
       const cleanSlug = slug.replace(/-/g, " ");
       return `https://streamtape.com/search?q=${encodeURIComponent(cleanSlug + " episode " + episode)}`;
-    },
-  },
-  {
-    id: "embedsu",
-    name: "HD-2",
-    supportsDub: false,
-    build: ({ anilistId, imdbId, format, season, episode }) => {
-      if (imdbId) {
-        return format === "MOVIE"
-          ? `https://embed.su/embed/movie/${imdbId}`
-          : `https://embed.su/embed/tv/${imdbId}/${season || 1}/${episode}`;
-      }
-      return `https://embed.su/embed/anime/ani${anilistId}/${episode}`;
-    },
-  },
-  {
-    id: "vidsrcto",
-    name: "VidCloud-2",
-    supportsDub: false,
-    build: ({ anilistId, imdbId, format, season, episode }) => {
-      if (imdbId) {
-        return format === "MOVIE"
-          ? `https://vidsrc.to/embed/movie/${imdbId}`
-          : `https://vidsrc.to/embed/tv/${imdbId}/${season || 1}/${episode}`;
-      }
-      return `https://vidsrc.to/embed/anime/ani${anilistId}/${episode}`;
     },
   },
 ];

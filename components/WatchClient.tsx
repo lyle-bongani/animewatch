@@ -79,13 +79,16 @@ export function WatchClient({
     .replace(/(^-|-$)/g, "");
 
   const currentEpMeta = anime.streamingEpisodes?.[episode - 1];
-  const seasonNum = currentEpMeta?.season || 1;
+  const seasonNum = currentEpMeta?.season || initialSeason || 1;
   const epNum = currentEpMeta?.episode || episode;
+
+  const resolvedImdbId =
+    anime.imdbId || (String(anime.id).includes("tt") ? String(anime.id) : null);
 
   const defaultSrc = server.build({
     anilistId: anime.id,
     malId: anime.idMal,
-    imdbId: anime.imdbId,
+    imdbId: resolvedImdbId,
     season: seasonNum,
     episode: epNum,
     type,
@@ -300,7 +303,7 @@ export function WatchClient({
                   title={`${displayTitle(anime)} — Episode ${episode}`}
                   allowFullScreen
                   allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
-                  referrerPolicy="no-referrer"
+                  referrerPolicy={server.referrerPolicy || "no-referrer-when-downgrade"}
                   className="h-full w-full border-0"
                 />
               ) : (
@@ -340,7 +343,7 @@ export function WatchClient({
                     title={`${displayTitle(anime)} — Episode ${episode} (Dailymotion)`}
                     allowFullScreen
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
-                    referrerPolicy="no-referrer"
+                    referrerPolicy={server.referrerPolicy || "no-referrer-when-downgrade"}
                     className="h-full w-full border-0"
                   />
                 </div>
@@ -379,7 +382,7 @@ export function WatchClient({
                 title={`${displayTitle(anime)} — Episode ${episode}`}
                 allowFullScreen
                 allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
-                referrerPolicy="no-referrer"
+                referrerPolicy={server.referrerPolicy || "no-referrer-when-downgrade"}
                 className="h-full w-full"
               />
             )}
