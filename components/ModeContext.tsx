@@ -78,11 +78,9 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mode, setModeState] = useState<AppMode>("anime");
-  const [mounted, setMounted] = useState(false);
 
-  // Sync mode based on URL pathname
+  // Sync mode state directly based on URL pathname
   useEffect(() => {
-    setMounted(true);
     if (pathname.startsWith("/movies")) {
       setModeState("movies");
       try {
@@ -105,11 +103,9 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
         /* ignore */
       }
     } else if (pathname === "/") {
+      setModeState("anime");
       try {
-        const stored = localStorage.getItem(STORAGE_KEY) as AppMode | null;
-        if (stored && APP_MODES[stored]) {
-          setModeState(stored);
-        }
+        localStorage.setItem(STORAGE_KEY, "anime");
       } catch {
         /* ignore */
       }
@@ -117,7 +113,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const setMode = useCallback(
-    (newMode: AppMode, navigate = false) => {
+    (newMode: AppMode, navigate = true) => {
       setModeState(newMode);
       try {
         localStorage.setItem(STORAGE_KEY, newMode);
@@ -127,11 +123,8 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
       if (navigate && typeof window !== "undefined") {
         const targetPath = APP_MODES[newMode].path;
-        if (pathname !== targetPath && (pathname === "/" || pathname === "/movies" || pathname === "/series" || pathname === "/manga")) {
-          // If already on one of the mode hubs, switch cleanly
-          if (pathname !== "/") {
-            router.push("/");
-          }
+        if (pathname !== targetPath) {
+          router.push(targetPath);
         }
       }
     },

@@ -108,7 +108,7 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-          <Link href="/" className="flex shrink-0 items-center gap-2">
+          <Link href="/" onClick={() => handleModeSelect("anime")} className="flex shrink-0 items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent font-black text-white shadow-md shadow-accent/40">
               A
             </span>

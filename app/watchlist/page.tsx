@@ -156,7 +156,8 @@ export default function WatchlistPage() {
                 {anime.title}
               </h3>
             </Link>
-          ))}
+          );
+        })}
         </div>
       )}
     </div>

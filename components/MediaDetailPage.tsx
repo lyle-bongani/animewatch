@@ -184,7 +184,7 @@ export function MediaDetailPage({ anime, mediaType }: MediaDetailPageProps) {
                 <WatchlistButton anime={anime} />
 
                 <div className="flex gap-2">
-                  <TrailerButton anime={anime} />
+                  {anime.trailer?.id && <TrailerButton youtubeId={anime.trailer.id} />}
                   <DownloadButton anime={anime} />
                 </div>
               </div>
