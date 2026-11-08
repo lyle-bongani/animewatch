@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { AdultGateProvider } from "@/components/AdultGateContext";
 import { ModeProvider } from "@/components/ModeContext";
+import { Analytics } from "@vercel/analytics/next";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -53,6 +54,7 @@ export default function RootLayout({
             <Footer />
           </ModeProvider>
         </AdultGateProvider>
+        <Analytics />
       </body>
     </html>
   );
